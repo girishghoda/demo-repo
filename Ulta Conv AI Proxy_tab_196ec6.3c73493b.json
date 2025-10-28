@@ -1,0 +1,253 @@
+[
+    {
+        "id": "196ec6.3c73493b",
+        "type": "tab",
+        "label": "Ulta Conv AI Proxy",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "2e7a40e9.03dae",
+        "type": "http in",
+        "z": "196ec6.3c73493b",
+        "name": "POST conversation-details",
+        "url": "/innovation/api/ccp/v1/interplay-conv-ai-lab/feedback/conversation-details",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 100,
+        "wires": [
+            [
+                "4399586f.ee7cd"
+            ]
+        ]
+    },
+    {
+        "id": "4399586f.ee7cd",
+        "type": "function",
+        "z": "196ec6.3c73493b",
+        "name": "Proxy to Ulta Conv Details",
+        "func": "msg.url = 'https://10.48.13.3/innovation/api/ccp/v1/interplay-conv-ai-lab/feedback/conversation-details';\nmsg.method = 'POST';\nmsg.headers = {\n    'accept': '*/*',\n    'accept-language': 'en-US,en;q=0.9',\n    'cache-control': 'no-cache',\n    'content-type': 'application/json',\n    'host': 'ccpservices-qa.ulta.lcl',\n    'origin': 'https://ccpservices-qa.ulta.lcl',\n    'pragma': 'no-cache',\n    'referer': 'https://ccpservices-qa.ultima.lcl/innovation/api/ccp/v1/interplay-conv-ai-lab/lab',\n    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'\n};\ntry {\n  const requireGlobal = global.get('require');\n  const env = requireGlobal('process').env || {};\n  const apiKey = env.ULTA_API_KEY || (global.get('ultaApiKey') || '');\n  const bearer = env.ULTA_API_BEARER || (global.get('ultaApiBearer') || '');\n  if (apiKey) { msg.headers['x-api-key'] = apiKey; }\n  if (bearer) { msg.headers['Authorization'] = 'Bearer ' + bearer; }\n} catch (e) {}\nmsg.rejectUnauthorized=false;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 480,
+        "y": 100,
+        "wires": [
+            [
+                "d5457d71.7760a8"
+            ]
+        ]
+    },
+    {
+        "id": "d5457d71.7760a8",
+        "type": "http request",
+        "z": "196ec6.3c73493b",
+        "name": "Forward Request",
+        "method": "use",
+        "ret": "obj",
+        "url": "",
+        "tls": "",
+        "x": 740,
+        "y": 100,
+        "wires": [
+            [
+                "c1c008ae.770dc8"
+            ]
+        ]
+    },
+    {
+        "id": "c1c008ae.770dc8",
+        "type": "http response",
+        "z": "196ec6.3c73493b",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 950,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "1c2202b.8cfce7d",
+        "type": "http in",
+        "z": "196ec6.3c73493b",
+        "name": "POST conversation-ids",
+        "url": "/innovation/api/ccp/v1/interplay-conv-ai-lab/feedback/conversation-ids",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 200,
+        "wires": [
+            [
+                "8a065494.7e31c8"
+            ]
+        ]
+    },
+    {
+        "id": "8a065494.7e31c8",
+        "type": "function",
+        "z": "196ec6.3c73493b",
+        "name": "Proxy to Ulta Conv IDs",
+        "func": "msg.url = 'https://10.48.13.3/innovation/api/ccp/v1/interplay-conv-ai-lab/feedback/conversation-ids';\nmsg.method = 'POST';\nmsg.headers = {\n    'accept': '*/*',\n    'accept-language': 'en-US,en;q=0.9',\n    'cache-control': 'no-cache',\n    'content-type': 'application/json',\n    'host': 'ccpservices-qa.ulta.lcl',\n    'origin': 'https://ccpservices-qa.ulta.lcl',\n    'pragma': 'no-cache',\n    'referer': 'https://ccpservices-qa.ulta.lcl/innovation/api/ccp/v1/interplay-conv-ai-lab/lab',\n    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'\n};\ntry {\n  const requireGlobal = global.get('require');\n  const env = requireGlobal('process').env || {};\n  const apiKey = env.ULTA_API_KEY || (global.get('ultaApiKey') || '');\n  const bearer = env.ULTA_API_BEARER || (global.get('ultaApiBearer') || '');\n  if (apiKey) { msg.headers['x-api-key'] = apiKey; }\n  if (bearer) { msg.headers['Authorization'] = 'Bearer ' + bearer; }\n} catch (e) {}\nmsg.rejectUnauthorized=false;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 480,
+        "y": 200,
+        "wires": [
+            [
+                "751127fe.351bd8"
+            ]
+        ]
+    },
+    {
+        "id": "751127fe.351bd8",
+        "type": "http request",
+        "z": "196ec6.3c73493b",
+        "name": "Forward Request",
+        "method": "use",
+        "ret": "obj",
+        "url": "",
+        "tls": "",
+        "x": 740,
+        "y": 200,
+        "wires": [
+            [
+                "5a565d4b.284d0c"
+            ]
+        ]
+    },
+    {
+        "id": "5a565d4b.284d0c",
+        "type": "http response",
+        "z": "196ec6.3c73493b",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 950,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "a0b22120.49e618",
+        "type": "http in",
+        "z": "196ec6.3c73493b",
+        "name": "POST getQueryData",
+        "url": "/innovation/api/ccp/v1/interplay-conv-ai-lab/getQueryData",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 300,
+        "wires": [
+            [
+                "503fdb56.6774d4"
+            ]
+        ]
+    },
+    {
+        "id": "503fdb56.6774d4",
+        "type": "function",
+        "z": "196ec6.3c73493b",
+        "name": "Proxy to Ulta Query Data",
+        "func": "msg.url = 'https://10.48.13.3/innovation/api/ccp/v1/interplay-conv-ai-lab/getQueryData';\nmsg.method = 'POST';\nmsg.headers = {\n    'accept': '*/*',\n    'accept-language': 'en-US,en;q=0.9',\n    'cache-control': 'no-cache',\n    'content-type': 'application/json',\n    'host': 'ccpservices-qa.ulta.lcl',\n    'origin': 'https://ccpservices-qa.ulta.lcl',\n    'pragma': 'no-cache',\n    'referer': 'https://ccpservices-qa.ulta.lcl/innovation/api/ccp/v1/interplay-conv-ai-lab/lab',\n    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'\n};\nmsg.rejectUnauthorized=false;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 480,
+        "y": 300,
+        "wires": [
+            [
+                "786ca912.49e968"
+            ]
+        ]
+    },
+    {
+        "id": "786ca912.49e968",
+        "type": "http request",
+        "z": "196ec6.3c73493b",
+        "name": "Forward Request",
+        "method": "use",
+        "ret": "obj",
+        "url": "",
+        "tls": "",
+        "x": 740,
+        "y": 300,
+        "wires": [
+            [
+                "52ce9ef5.e92268"
+            ]
+        ]
+    },
+    {
+        "id": "52ce9ef5.e92268",
+        "type": "http response",
+        "z": "196ec6.3c73493b",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 950,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "79edcaa7.25e23c",
+        "type": "http in",
+        "z": "196ec6.3c73493b",
+        "name": "GET getPrompt",
+        "url": "/innovation/api/ccp/v1/interplay-conv-ai-lab/getPrompt",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 400,
+        "wires": [
+            [
+                "a0139f16.c1a9f"
+            ]
+        ]
+    },
+    {
+        "id": "a0139f16.c1a9f",
+        "type": "function",
+        "z": "196ec6.3c73493b",
+        "name": "Proxy to Ulta Get Prompt",
+        "func": "const queryParams = msg.req.query;\nlet queryString = '';\nif (Object.keys(queryParams).length > 0) {\n    queryString = '?' + Object.keys(queryParams).map(key => \n        encodeURIComponent(key) + '=' + encodeURIComponent(queryParams[key])\n    ).join('&');\n}\nmsg.url = `https://10.48.13.3/innovation/api/ccp/v1/interplay-conv-ai-lab/getPrompt${queryString}`;\nmsg.method = 'GET';\nmsg.headers = {\n    'accept': '*/*',\n    'accept-language': 'en-US,en;q=0.9',\n    'cache-control': 'no-cache',\n    'pragma': 'no-cache',\n    'host': 'ccpservices-qa.ulta.lcl',\n    'referer': 'https://ccpservices-qa.ulta.lcl/innovation/api/ccp/v1/interplay-conv-ai-lab/lab',\n    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'\n};\nmsg.rejectUnauthorized=false;\nmsg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 480,
+        "y": 400,
+        "wires": [
+            [
+                "14165b2.7d78425"
+            ]
+        ]
+    },
+    {
+        "id": "14165b2.7d78425",
+        "type": "http request",
+        "z": "196ec6.3c73493b",
+        "name": "Forward Request",
+        "method": "use",
+        "ret": "txt",
+        "url": "",
+        "tls": "",
+        "x": 740,
+        "y": 400,
+        "wires": [
+            [
+                "30404722.f59a1"
+            ]
+        ]
+    },
+    {
+        "id": "30404722.f59a1",
+        "type": "http response",
+        "z": "196ec6.3c73493b",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 950,
+        "y": 400,
+        "wires": []
+    }
+]
