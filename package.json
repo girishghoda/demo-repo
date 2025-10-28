@@ -1,0 +1,12 @@
+{
+    "name": "CUSTOM",
+    "description": "A Interplay Project",
+    "version": "0.0.1",
+    "dependencies": {},
+    "node-red": {
+        "settings": {
+            "flowFile": "flow_v2.json",
+            "credentialsFile": "flow_cred.json"
+        }
+    }
+}
