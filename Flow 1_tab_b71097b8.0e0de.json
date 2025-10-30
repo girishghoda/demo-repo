@@ -1,0 +1,24 @@
+[
+    {
+        "id": "b71097b8.0e0de",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "82f53dc3.21a9b8",
+        "type": "discover device",
+        "z": "b71097b8.0e0de",
+        "name": "",
+        "network": 65535,
+        "lowLimit": 0,
+        "highLimit": 4194304,
+        "whoIsTimeout": 3000,
+        "x": 440,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    }
+]
