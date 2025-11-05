@@ -1,0 +1,775 @@
+[
+    {
+        "id": "d3da3245.d67078",
+        "type": "tab",
+        "label": "Ulta Conv AI Lab",
+        "disabled": false,
+        "info": "Multi-environment Dashboard with LLM Analysis (formatted, cached, and safe sqlite usage)"
+    },
+    {
+        "id": "46f20a5d.9699f4",
+        "type": "http in",
+        "z": "d3da3245.d67078",
+        "name": "GET /health",
+        "url": "/health",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 80,
+        "wires": [
+            [
+                "6645af38.7bde"
+            ]
+        ]
+    },
+    {
+        "id": "6645af38.7bde",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Health",
+        "func": "// Simple liveness\nmsg.payload = {\n  status: \"OK\",\n  timestamp: new Date().toISOString(),\n  service: \"Ulta Conv AI Lab\"\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 280,
+        "y": 80,
+        "wires": [
+            [
+                "85779d4b.fad92"
+            ]
+        ]
+    },
+    {
+        "id": "85779d4b.fad92",
+        "type": "http response",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "x": 440,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "8a4638d3.5eaff",
+        "type": "http in",
+        "z": "d3da3245.d67078",
+        "name": "GET /api/environment",
+        "url": "/api/environment",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 160,
+        "wires": [
+            [
+                "4c8d7e88.2d2bc8"
+            ]
+        ]
+    },
+    {
+        "id": "4c8d7e88.2d2bc8",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Environment Handler",
+        "func": "// Switch or get environment; no optional chaining.\nconst q = (msg && msg.req && msg.req.query) ? msg.req.query : {};\nconst env = q.env;\n\nconst envs = {\n  qa:    { name: \"QA\",           apiUrl: \"https://ccpservices-qa.ulta.lcl\",    dbPath: \"/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite\", catalogPath: \"/Users/Arul329/Downloads/ulta_conv_ai/ulta_product_catalog.csv\" },\n  prod:  { name: \"Production\",   apiUrl: \"https://ccpservices.ulta.lcl\",       dbPath: \"/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_prod.sqlite\", catalogPath: \"/Users/Arul329/Downloads/ulta_conv_ai/ulta_product_catalog.csv\" },\n  dev:   { name: \"Development\",  apiUrl: \"https://ccpservices-dev.ulta.lcl\",   dbPath: \"/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_dev.sqlite\", catalogPath: \"/Users/Arul329/Downloads/ulta_conv_ai/ulta_product_catalog.csv\" },\n  stress:{ name: \"Stress Test\",  apiUrl: \"https://ccpservices-stress.ulta.lcl\",dbPath: \"/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_stress.sqlite\", catalogPath: \"/Users/Arul329/Downloads/ulta_conv_ai/ulta_product_catalog.csv\" },\n  proxy: { name: \"Local Proxy\",  apiUrl: \"http://127.0.0.1:1880\",              dbPath: \"/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_proxy.sqlite\", catalogPath: \"/Users/Arul329/Downloads/ulta_conv_ai/ulta_product_catalog.csv\" }\n};\n\nif (env && envs[env]) {\n  global.set(\"currentEnvironment\", env);\n  global.set(\"environmentConfig\", envs[env]);\n  msg.payload = { success: true, environment: env, config: envs[env], message: \"Environment switched to \" + envs[env].name };\n} else {\n  const curr = global.get(\"currentEnvironment\") || \"qa\";\n  msg.payload = { success: true, currentEnvironment: curr, config: envs[curr], availableEnvironments: envs };\n}\nnode.warn(msg);\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 370,
+        "y": 160,
+        "wires": [
+            [
+                "26f658a.4611ea8"
+            ]
+        ]
+    },
+    {
+        "id": "26f658a.4611ea8",
+        "type": "http response",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "x": 600,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "d82bd32d.bbb2d",
+        "type": "http in",
+        "z": "d3da3245.d67078",
+        "name": "POST /api/sync",
+        "url": "/api/sync",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 240,
+        "wires": [
+            [
+                "db6a2202.82894"
+            ]
+        ]
+    },
+    {
+        "id": "db6a2202.82894",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Sync Handler",
+        "func": "// Create tables if DB missing\nconst requireGlobal = context.global.get('require');\nconst cp = requireGlobal('child_process');\nconst fs = requireGlobal('fs');\n\nconst curr = global.get('currentEnvironment') || 'qa';\nconst cfg  = global.get('environmentConfig') || { apiUrl: 'https://ccpservices-qa.ulta.lcl', dbPath: '/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite' };\n\nfunction safe(cmd){\n  try { return cp.execSync(cmd, {encoding:'utf8', timeout:5000}).toString(); }\n  catch(e){ return ''; }\n}\n\nif (!fs.existsSync(cfg.dbPath)) {\n  const sql =\n    \"CREATE TABLE conversation_ids(id TEXT PRIMARY KEY,date TEXT,timestamp TEXT,source TEXT DEFAULT '\" + curr + \"',synced_at TEXT DEFAULT(datetime('now')));\" +\n    \"CREATE INDEX idx_conv_date ON conversation_ids(date);\" +\n    \"CREATE TABLE conversation_details(id TEXT PRIMARY KEY,date TEXT,json TEXT,synced_at TEXT DEFAULT(datetime('now')));\" +\n    \"CREATE INDEX idx_details_date ON conversation_details(date);\" +\n    \"CREATE TABLE conversation_analysis(id TEXT PRIMARY KEY,date TEXT,feedback TEXT,used_skus TEXT,analysis TEXT,analyzed_at TEXT DEFAULT(datetime('now')));\" +\n    \"CREATE INDEX idx_analysis_date ON conversation_analysis(date);\" +\n    \"CREATE TABLE analysis_summary(cache_key TEXT PRIMARY KEY,start_date TEXT,end_date TEXT,limit_count INTEGER,kpi_data TEXT,analysis_data TEXT,created_at TEXT DEFAULT(datetime('now')),expires_at TEXT DEFAULT(datetime('now','+1 hour')));\" +\n    \"CREATE INDEX idx_summary_dates ON analysis_summary(start_date,end_date);\" +\n    \"CREATE INDEX idx_summary_expires ON analysis_summary(expires_at);\" +\n    \"CREATE TABLE sync_status(id INTEGER PRIMARY KEY,environment TEXT,last_sync_date TEXT,total_conversations INTEGER DEFAULT 0,updated_at TEXT DEFAULT(datetime('now')));\";\n  safe(\"sqlite3 '\" + cfg.dbPath + \"' \\\"\" + sql + \"\\\"\");\n}\n\nconst body = msg.payload || {};\nconst startDate = (body.startDate && /\\d{4}-\\d{2}-\\d{2}/.test(body.startDate)) ? body.startDate : '2025-01-01';\nconst endDate   = (body.endDate   && /\\d{4}-\\d{2}-\\d{2}/.test(body.endDate))   ? body.endDate   : new Date().toISOString().split('T')[0];\n\nmsg.payload = { success:true, action:'sync', environment:curr, syncStartDate:startDate, syncEndDate:endDate, message:\"Sync ready for \" + curr + \": \" + startDate + \" to \" + endDate };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 330,
+        "y": 240,
+        "wires": [
+            [
+                "326e0c63.2d8ba4"
+            ]
+        ]
+    },
+    {
+        "id": "326e0c63.2d8ba4",
+        "type": "http response",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "x": 550,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "3a4d65a7.58312a",
+        "type": "http in",
+        "z": "d3da3245.d67078",
+        "name": "GET /api/conversations",
+        "url": "/api/conversations",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 320,
+        "wires": [
+            [
+                "b72f407.97c0c4"
+            ]
+        ]
+    },
+    {
+        "id": "b72f407.97c0c4",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Drill-down",
+        "func": "// Paged list using hex(json) for safe parsing\nvar getGlobal = (global.get ? global.get : (context.global && context.global.get ? context.global.get.bind(context.global) : null));\nif (!getGlobal) { node.error(\"Global context not available.\"); return msg; }\nvar requireGlobal = getGlobal('require');\nif (!requireGlobal) { node.error(\"Global 'require' not exposed.\"); return msg; }\nconst cp = requireGlobal('child_process');\n\nconst curr = getGlobal('currentEnvironment') || 'qa';\nconst cfg  = getGlobal('environmentConfig') || { dbPath: '/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite' };\n\nfunction runSql(args){\n  try { return cp.execFileSync('sqlite3', args, {encoding:'utf8', timeout:5000}).toString(); }\n  catch(e){ node.warn(\"sqlite3 error: \" + e.message); return ''; }\n}\nfunction sqlQuote(v){ return \"'\" + String(v).replace(/'/g, \"''\") + \"'\"; }\n\nvar q = (msg && msg.req && msg.req.query) ? msg.req.query : {};\nvar feedback  = q.feedback || undefined;\nvar startDate = q.startDate || '';\nvar endDate   = q.endDate || '';\nvar page      = parseInt(q.page,10);  if(!Number.isFinite(page)||page<1) page=1;\nvar limit     = parseInt(q.limit,10); if(!Number.isFinite(limit)||limit<1) limit=20;\nif (limit>200) limit=200;\nvar offset    = (page-1)*limit;\n\nvar where = \"WHERE 1=1\";\nif (feedback==='positive') where += \" AND json LIKE '%👍%'\";\nelse if (feedback==='negative') where += \" AND json LIKE '%👎%'\";\n\nif (startDate) where += \" AND date >= \" + sqlQuote(startDate);\nif (endDate)   where += \" AND date <= \" + sqlQuote(endDate);\n\nvar cntRaw = runSql(['-readonly', cfg.dbPath, \"SELECT COUNT(*) FROM conversation_details \" + where]).trim();\nvar total = parseInt(cntRaw||'0',10); if(!Number.isFinite(total)) total=0;\n\nvar sep = '|~|';\nvar dataSql =\n  \"SELECT id, date, hex(json) AS json_hex, substr(json,1,500) AS preview \" +\n  \"FROM conversation_details \" + where + \" \" +\n  \"ORDER BY date DESC \" +\n  \"LIMIT \" + limit + \" OFFSET \" + offset;\n\nvar out = runSql(['-readonly', cfg.dbPath, '-separator', sep, dataSql]);\nvar convs = [];\nif (out) {\n  var lines = out.trim().split('\\n');\n  for (var i=0;i<lines.length;i++){\n    var parts = lines[i].split(sep);\n    if (parts.length>=4){\n      var id   = parts[0];\n      var date = parts[1];\n      var jhex = parts[2]||'';\n      var preview = parts[3]||'';\n      var obj = null;\n      try { obj = JSON.parse(Buffer.from(jhex,'hex').toString('utf8')); } catch(e){}\n      var chat = (obj&&Array.isArray(obj.chat_history)) ? obj.chat_history : [];\n      var fb = 'none';\n      for (var k=0;k<chat.length;k++){\n        var c = (chat[k]&&chat[k].content)||'';\n        if (c.indexOf('👎')!==-1){ fb='negative'; break; }\n        if (c.indexOf('👍')!==-1){ fb='positive'; break; }\n      }\n      convs.push({ id, date, preview, chat_history: chat, feedback: fb });\n    }\n  }\n}\n\nmsg.payload = {\n  success: true,\n  environment: curr,\n  conversations: convs,\n  pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total/Math.max(1,limit))) },\n  filters: { feedback, startDate, endDate }\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 360,
+        "y": 320,
+        "wires": [
+            [
+                "5a3e63.cb14799c"
+            ]
+        ]
+    },
+    {
+        "id": "5a3e63.cb14799c",
+        "type": "http response",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "x": 600,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "57791ab9.4c3174",
+        "type": "http in",
+        "z": "d3da3245.d67078",
+        "name": "GET /api/db-counts",
+        "url": "/api/db-counts",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 420,
+        "wires": [
+            [
+                "9e385992.98754"
+            ]
+        ]
+    },
+    {
+        "id": "9e385992.98754",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Counts Handler",
+        "func": "// Quick KPI counts\nconst requireGlobal = context.global.get('require');\nconst cp = requireGlobal('child_process');\nconst curr = global.get('currentEnvironment') || 'qa';\nconst cfg  = global.get('environmentConfig') || { dbPath:'/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite' };\n\nfunction safe(cmd){ try { return cp.execSync(cmd,{encoding:'utf8',timeout:5000}).toString(); } catch(e){ return ''; } }\n\nconst q = (msg && msg.req && msg.req.query) ? msg.req.query : {};\nconst start = q.startDate || new Date(Date.now()-7*24*60*60*1000).toISOString().split('T')[0];\nconst end   = q.endDate   || new Date().toISOString().split('T')[0];\n\nconst total    = parseInt((safe(\"sqlite3 -readonly '\" + cfg.dbPath + \"' \\\"SELECT COUNT(*) FROM conversation_details WHERE date>='\" + start + \"' AND date<='\" + end + \"'\\\"\").trim()) || '0',10);\nconst positive = parseInt((safe(\"sqlite3 -readonly '\" + cfg.dbPath + \"' \\\"SELECT COUNT(*) FROM conversation_details WHERE date>='\" + start + \"' AND date<='\" + end + \"' AND json LIKE '%👍%'\\\"\").trim()) || '0',10);\nconst negative = parseInt((safe(\"sqlite3 -readonly '\" + cfg.dbPath + \"' \\\"SELECT COUNT(*) FROM conversation_details WHERE date>='\" + start + \"' AND date<='\" + end + \"' AND json LIKE '%👎%'\\\"\").trim()) || '0',10);\n\nmsg.payload = { success:true, environment:curr, dateRange:{ startDate:start, endDate:end }, counts:{ total, positive, negative } };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 380,
+        "y": 420,
+        "wires": [
+            [
+                "f5e04479.4ce76"
+            ]
+        ]
+    },
+    {
+        "id": "f5e04479.4ce76",
+        "type": "http response",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "x": 620,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "fe2a1b2b.e63c08",
+        "type": "http in",
+        "z": "d3da3245.d67078",
+        "name": "GET /api/db-analyze",
+        "url": "/api/db-analyze",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 500,
+        "wires": [
+            [
+                "26fffd8d.90e372",
+                "963b3b1a.be2358"
+            ]
+        ]
+    },
+    {
+        "id": "9fc3eb28.739f58",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Load Conversations & SKUs",
+        "func": "// Load analyzed rows if available; avoid per-request LLM calls\nconst requireGlobal = context.global.get('require');\nconst cp = requireGlobal('child_process');\nconst fs = requireGlobal('fs');\n\nconst curr = global.get('currentEnvironment') || 'qa';\nconst cfg  = global.get('environmentConfig') || {};\n\nfunction sqliteArgs(args){\n  try {\n    return cp.execFileSync('sqlite3', args, {encoding:'utf8', timeout:8000}).toString();\n  } catch(e){ return ''; }\n}\n\nconst q = (msg && msg.req && msg.req.query) ? msg.req.query : {};\nconst end  = q.endDate   ? new Date(q.endDate)   : new Date();\nconst start= q.startDate ? new Date(q.startDate) : new Date(end.getTime()-7*24*60*60*1000);\nmsg.startDate = start.toISOString().split('T')[0];\nmsg.endDate   = end.toISOString().split('T')[0];\nmsg.max = Math.max(1, Math.min(Number(q.limit||20), 100));\n\nif (!cfg.dbPath || !fs.existsSync(cfg.dbPath)) {\n  msg.payload = { success:true, environment:curr, message:'No database found; run ingest first', analyses:[], counts:{positive:0,negative:0,total:0} };\n  return msg;\n}\n\n// Try to read existing analyses from conversation_analysis\nconst sep='|~|';\nconst sql = [\n  \"SELECT id, date, feedback, analysis_json, used_skus_json\",\n  \"FROM conversation_analysis\",\n  \"WHERE date>=? AND date<=?\",\n  \"ORDER BY date DESC\",\n  \"LIMIT ?\"\n].join(\" \");\n\nconst out = sqliteArgs(['-readonly','-separator',sep, cfg.dbPath, sql, msg.startDate, msg.endDate, String(msg.max)]);\nnode.warn(out);\nconst analyses = [];\nif (out){\n  const lines = out.trim().split('\\n');\n  for (const ln of lines){\n    const parts = ln.split(sep);\n    if (parts.length < 5) continue;\n    const id = parts[0], date = parts[1], fb = parts[2];\n    let analysis = null, used = [];\n    try { analysis = JSON.parse(parts[3] || \"{}\"); } catch(e){ analysis = null; }\n    try { used = JSON.parse(parts[4] || \"[]\"); } catch(e){ used = []; }\n    analyses.push({ id, date, feedback: fb || 'none', analysis, used_skus: Array.isArray(used)?used:[] });\n  }\n}\n\nif (analyses.length > 0) {\n  // We already have analyzed data; skip LLM loop\n  msg.conversations = [];\n  msg.skuData = {};\n  msg.currentIndex = 0;\n  msg.analysisResults = analyses;\n  return msg;\n}\n\n// Fallback: if no prior analyses, do the old path (minimal window) which will call LLM once per conversation\nlet skus={ '2546071':{sku:'2546071',name:'Airbrush Placement Shadow Brush',price:'14.5',brand:'IT BRUSHES FOR ULTA'},\n           '2555575':{sku:'2555575',name:'Flawless Dermaplane Travel Pack',price:'5.99',brand:'FLAWLESS BY FINISHING TOUCH'},\n           '2576318':{sku:'2576318',name:'Nourishing Hand Wash',price:'48.0',brand:'OUAI'} };\n\nconst sql2 = [\n  \"SELECT id, date, json\",\n  \"FROM conversation_details\",\n  \"WHERE (json LIKE '%👎%' OR json LIKE '%👍%') AND date>=? AND date<=?\",\n  \"ORDER BY date DESC\",\n  \"LIMIT ?\"\n].join(\" \");\nconst out2 = sqliteArgs(['-readonly','-separator',sep, cfg.dbPath, sql2, msg.startDate, msg.endDate, String(msg.max)]);\nnode.warn(out2);\nconst convs=[];\nif (out2){\n  const lines = out2.trim().split('\\n');\n  for (const ln of lines){\n    const parts = ln.split(sep);\n    if (parts.length<3) continue;\n    const id = parts[0];\n    const date = parts[1];\n    const jtxt = parts.slice(2).join(sep);\n    try {\n      const obj = JSON.parse(jtxt);\n      const chat = Array.isArray(obj.chat_history) ? obj.chat_history : [];\n      let fb='none';\n      for (const m of chat){\n        if (m && typeof m.content === 'string' && m.content.indexOf('👎')>=0){ fb='negative'; break; }\n        if (m && typeof m.content === 'string' && m.content.indexOf('👍')>=0){ fb='positive'; break; }\n      }\n      const content = chat.map(m => (m&&m.content)||'').join(' ');\n      const matches = content.match(/\\b\\d{6,8}\\b/g) || [];\n      const used=[];\n      for (const s of matches){ if (skus[s]) used.push(skus[s]); }\n      convs.push({ id, date, feedback: fb, chat_history: chat, used_skus: used });\n    } catch(e){}\n  }\n}\n\nmsg.conversations = convs;\nmsg.skuData = skus;\nmsg.currentIndex = 0;\nmsg.analysisResults = [];\nnode.warn(msg);\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 410,
+        "y": 520,
+        "wires": [
+            [
+                "ff1ecb3d.eef91"
+            ]
+        ]
+    },
+    {
+        "id": "ff1ecb3d.eef91",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Prepare LLM Request",
+        "func": "// Exit early if we’re out of conversations\nif (!msg.conversations || typeof msg.currentIndex !== 'number' || msg.currentIndex >= msg.conversations.length) {\n  return [msg, null];\n}\n\nconst conv = msg.conversations[msg.currentIndex] || {};\nconst rawHistory = Array.isArray(conv.chat_history) ? conv.chat_history.slice(-40) : [];\nconst skuData = (msg.skuData && typeof msg.skuData === 'object') ? msg.skuData : {};\n\nfunction normRole(r){\n  const t = String(r || '').toLowerCase();\n  return (t === 'assistant' || t === 'system' || t === 'user') ? t : 'user';\n}\n\n// Clean text so JSON.stringify can safely encode it.\nfunction cleanText(s){\n  s = String(s == null ? '' : s);\n  // normalize CR to LF\n  s = s.replace(/\\r\\n?/g, '\\n');\n  // strip ASCII control chars except tab/newline\n  s = s.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/g, ' ');\n  // remove JS line and paragraph separators\n  s = s.replace(/[\\u2028\\u2029]/g, ' ');\n  // strip unpaired surrogates\n  s = s.replace(/[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])/g, '')\n       .replace(/(?<![\\uD800-\\uDBFF])[\\uDC00-\\uDFFF]/g, '');\n  // collapse excessive whitespace a bit\n  s = s.replace(/[ \\t]+/g, ' ');\n  if (s.length > 8000) s = s.slice(0, 8000);\n  return s;\n}\n\nfunction extractSkusFromChat(chat){\n  const set = {};\n  for (let i=0;i<chat.length;i++){\n    const c = String((chat[i] && chat[i].content) || '');\n    const matches = c.match(/\\b\\d{6,8}\\b/g) || [];\n    for (let j=0;j<matches.length;j++) set[matches[j]] = true;\n  }\n  return Object.keys(set);\n}\n\nfunction buildProductContext(skucodes, skuMap){\n  const lines = [];\n  const used = [];\n  for (const code of skucodes){\n    const p = skuMap[code];\n    if (p){\n      used.push(p);\n      lines.push(`- SKU ${p.sku}: ${p.name} by ${p.brand}${p.price ? ` ($${p.price})` : ''}${p.category ? ` [${p.category}]` : ''}`);\n    }\n  }\n  return { text: lines.length ? lines.join('\\n') : 'No specific products mentioned', used };\n}\n\n// 1) Filter history: DROP assistant prose; keep only system + user\nconst history = rawHistory\n  .filter(m => {\n    const r = normRole(m.role);\n    return r === 'system' || r === 'user';\n  })\n  .map(m => ({ role: normRole(m.role), content: cleanText(m.content) }));\n\nconst foundSkus = extractSkusFromChat(history);\nconst ctx = buildProductContext(foundSkus, skuData);\n\nconst systemPrompt = [\n  'You are an expert customer service analyst for Ulta Beauty. Analyze the following conversation and provide insights.',\n  '',\n  'Product Context:',\n  ctx.text,\n  '',\n  'Focus on: what likely influenced the customer feedback (positive/negative), product fit, price/value, and guidance for a better outcome.',\n  'Return ONLY a compact JSON object with keys: reason, priority, recommendations, sentiment_score, category. No prose, no backticks, no prefix.'\n].join('\\n');\n\nconst messages = [\n  { role: 'system', content: cleanText(systemPrompt) },\n  ...history,\n  { role: 'user', content: 'JSON only with keys reason, priority, recommendations, sentiment_score, category.' }\n];\n\n/*\n// Build the payload as an object\nconst payloadObj = {\n  model: msg.model || 'gpt-4o-mini',\n  messages,\n  temperature: 0.2,\n  max_tokens: 500,\n  // 2) Force JSON output where supported\n  response_format: { type: 'json_object' }\n  // 3) No stop needed\n};\n\n// Send object; Node-RED will JSON-stringify because of Content-Type\nmsg.llmPayload = payloadObj;\nmsg.payload = payloadObj;\n\ntry{\n  const requireGlobal = context.global.get('require');\n  const key = (requireGlobal('process').env.ULTA_LLM_KEY || global.get('llmKey') || '');\n  msg.headers = Object.assign({}, msg.headers, {\n    Authorization: key ? ('Bearer ' + key) : undefined,\n    'Content-Type': 'application/json',\n    'Accept': 'application/json'\n  });\n} catch(e){ node.warn('LLM key not found'); }\n\nmsg.rejectUnauthorized = false;\nmsg.currentConv = { id: conv.id, date: conv.date, feedback: conv.feedback, used_skus: ctx.used };\nreturn [null, msg];\n*/\nmsg.model=\"gpt-oss-20b\";\n// Build the payload as an object first\nconst payloadObj = {\n  model: msg.model || 'gpt-4o-mini',\n  messages,\n  temperature: 0.2,\n  max_tokens: 5000,\n  // strongly encourage JSON outputs\n  response_format: { type: 'text' }\n};\n\n// 1) Explicitly STRINGIFY the payload we send over HTTP\nconst body = JSON.stringify(payloadObj);\n\n// 2) Sanity check: parse back locally. If this throws, you’ll see it here, not on server.\ntry { JSON.parse(body); }\ncatch (e) {\n    node.warn(body);\n  node.warn(\"JSON parse error\");\n  // Fail fast to first output so you can inspect msg.llmPayload\n  msg.llmPayload = payloadObj;\n  msg.payload = { local_json_error: String(e && e.message), preview: body.slice(0, 500) };\n  return [msg, null];\n}\n\n// Ship the JSON text body\nmsg.llmPayload = payloadObj;\nmsg.payload = body;\nmsg.headers = {};\n\ntry {\n  const requireGlobal = context.global.get('require');\n  const key = (requireGlobal('process').env.ULTA_LLM_KEY || global.get('llmKey') || '');\n  msg.headers = Object.assign({}, msg.headers, {\n    Authorization: key ? ('Bearer ' + key) : undefined,\n    'Content-Type': 'application/json',\n    'Accept': 'application/json'\n  });\n} catch(e){ node.warn('LLM key not found'); }\n\nmsg.rejectUnauthorized = false;\nmsg.currentConv = { id: conv.id, date: conv.date, feedback: conv.feedback, used_skus: ctx.used };\n\nnode.warn(msg);\n// Route to HTTP node\nreturn [null, msg];\n",
+        "outputs": 2,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 700,
+        "y": 480,
+        "wires": [
+            [
+                "4267ba70.83af5c"
+            ],
+            [
+                "418be243.6c5824"
+            ]
+        ]
+    },
+    {
+        "id": "418be243.6c5824",
+        "type": "http request",
+        "z": "d3da3245.d67078",
+        "name": "Call LLM API",
+        "method": "POST",
+        "ret": "obj",
+        "shouldUnZip": false,
+        "url": "http://127.0.0.1:1234/v1/chat/completions",
+        "tls": "",
+        "x": 970,
+        "y": 500,
+        "wires": [
+            [
+                "9d153731.95011"
+            ]
+        ]
+    },
+    {
+        "id": "9d153731.95011",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Process LLM Response",
+        "func": "// Older Node-RED compatible parser for model output -> JSON analysis.\n// - No optional chaining, no arrow funcs, no let/const, no lookbehind.\n// - Tries strict JSON, then extracts first {...} with quote-aware scan.\n// - Normalizes fields and accumulates results like your original.\nnode.warn(msg);\nfunction strictParseJSON(text) {\n  try {\n    var t = String(text == null ? \"\" : text).trim();\n    if (!t) return null;\n    return JSON.parse(t);\n  } catch (e) {\n    return null;\n  }\n}\n\nfunction extractFirstJSONObject(text) {\n  if (!text) return null;\n  var s = String(text);\n\n  // Try fenced code blocks first\n  var fenceRe = /```(?:json)?\\s*([\\s\\S]*?)\\s*```/gi;\n  var m;\n  while ((m = fenceRe.exec(s)) !== null) {\n    var cand = (m[1] || \"\").trim();\n    var obj = strictParseJSON(cand);\n    if (obj && typeof obj === \"object\") return obj;\n  }\n\n  // Quote-aware brace scan\n  var depth = 0;\n  var inStr = false;\n  var esc = false;\n  var start = -1;\n  for (var i = 0; i < s.length; i++) {\n    var ch = s.charAt(i);\n\n    if (inStr) {\n      if (esc) {\n        esc = false;\n      } else if (ch === \"\\\\\") {\n        esc = true;\n      } else if (ch === '\"') {\n        inStr = false;\n      }\n      continue;\n    }\n\n    if (ch === '\"') {\n      inStr = true;\n      continue;\n    }\n    if (ch === \"{\") {\n      if (depth === 0) start = i;\n      depth++;\n    } else if (ch === \"}\") {\n      if (depth > 0) depth--;\n      if (depth === 0 && start !== -1) {\n        var cand2 = s.slice(start, i + 1);\n        try {\n          return JSON.parse(cand2);\n        } catch (e2) {\n          start = -1; // keep scanning\n        }\n      }\n    }\n  }\n\n  return null;\n}\n\nfunction stripUnpairedSurrogates(s) {\n  // Keep valid surrogate pairs; drop isolated halves\n  var out = \"\";\n  for (var i = 0; i < s.length; i++) {\n    var code = s.charCodeAt(i);\n    if (code >= 0xD800 && code <= 0xDBFF) {\n      // high surrogate\n      if (i + 1 < s.length) {\n        var next = s.charCodeAt(i + 1);\n        if (next >= 0xDC00 && next <= 0xDFFF) {\n          out += s.charAt(i) + s.charAt(i + 1);\n          i++; // consumed pair\n          continue;\n        } else {\n          // drop lone high\n          continue;\n        }\n      } else {\n        // trailing lone high\n        continue;\n      }\n    } else if (code >= 0xDC00 && code <= 0xDFFF) {\n      // lone low surrogate, drop\n      continue;\n    } else {\n      out += s.charAt(i);\n    }\n  }\n  return out;\n}\n\nfunction normalizeUnicode(s) {\n  s = String(s == null ? \"\" : s);\n  s = s.replace(/\\r\\n?/g, \"\\n\"); // CRLF -> LF\n  s = s.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/g, \" \"); // control chars\n  s = s.replace(/[\\u2028\\u2029]/g, \" \"); // JS line/para sep\n  s = s.replace(/[\\u201C\\u201D]/g, '\"'); // curly double\n  s = s.replace(/[\\u2018\\u2019]/g, \"'\"); // curly single\n  s = stripUnpairedSurrogates(s);\n  return s;\n}\n\nfunction coerceAnalysis(obj, msg) {\n  var fb = \"\";\n  if (msg.currentConv && msg.currentConv.feedback) {\n    fb = String(msg.currentConv.feedback).toLowerCase();\n  }\n  var fallbackScore = fb === \"positive\" ? 0.6 : (fb === \"negative\" ? -0.6 : 0);\n\n  var out = {\n    reason: \"\",\n    priority: \"medium\",\n    recommendations: [],\n    sentiment_score: fallbackScore,\n    category: \"general\"\n  };\n\n  if (obj && typeof obj === \"object\") {\n    if (typeof obj.reason === \"string\") out.reason = obj.reason;\n    if (typeof obj.priority === \"string\") out.priority = obj.priority;\n    if (typeof obj.category === \"string\") out.category = obj.category;\n\n    if (typeof obj.sentiment_score === \"number\" && isFinite(obj.sentiment_score)) {\n      if (obj.sentiment_score > 1) obj.sentiment_score = 1;\n      if (obj.sentiment_score < -1) obj.sentiment_score = -1;\n      out.sentiment_score = obj.sentiment_score;\n    }\n\n    if (Object.prototype.toString.call(obj.recommendations) === \"[object Array]\") {\n      var arr = [];\n      for (var i = 0; i < obj.recommendations.length && arr.length < 8; i++) {\n        var v = obj.recommendations[i];\n        if (v != null) {\n          var str = String(v).trim();\n          if (str) arr.push(str);\n        }\n      }\n      out.recommendations = arr;\n    } else if (typeof obj.recommendations === \"string\") {\n      var parts = obj.recommendations.split(/[;\\n]+/);\n      var arr2 = [];\n      for (var j = 0; j < parts.length && arr2.length < 8; j++) {\n        var p = String(parts[j]).trim();\n        if (p) arr2.push(p);\n      }\n      out.recommendations = arr2;\n    }\n  }\n\n  out.reason = String(out.reason || \"\").slice(0, 500);\n  out.priority = String(out.priority || \"medium\");\n  out.category = String(out.category || \"general\");\n  return out;\n}\n\nvar analysis = {\n  reason: \"Unable to parse JSON from model output\",\n  priority: \"low\",\n  recommendations: [],\n  sentiment_score: 0,\n  category: \"unknown\"\n};\n\ntry {\n  if (msg.payload && msg.payload.choices && msg.payload.choices[0]) {\n    var choice0 = msg.payload.choices[0];\n    var raw = \"\";\n    if (choice0.message && typeof choice0.message.content === \"string\") {\n      raw = choice0.message.content;\n    } else if (typeof choice0.text === \"string\") {\n      raw = choice0.text;\n    }\n\n    var cleaned = normalizeUnicode(raw);\n\n    // 1) strict parse\n    var obj = strictParseJSON(cleaned);\n\n    // 2) fallback extraction\n    if (!obj) obj = extractFirstJSONObject(cleaned);\n\n    if (obj && typeof obj === \"object\") {\n      analysis = coerceAnalysis(obj, msg);\n    } else {\n      if (msg.payload && msg.payload.error) {\n        var e = msg.payload.error.message || JSON.stringify(msg.payload.error);\n        node.warn(\"LLM error: \" + e);\n      } else {\n        node.warn(\"LLM parse warning: could not extract JSON from model output.\");\n      }\n      analysis = coerceAnalysis(null, msg);\n    }\n  } else if (msg.payload && msg.payload.error) {\n    var ee = msg.payload.error.message || JSON.stringify(msg.payload.error);\n    node.warn(\"LLM error: \" + ee);\n    analysis = coerceAnalysis(null, msg);\n  } else {\n    node.warn(\"LLM response missing choices array\");\n    analysis = coerceAnalysis(null, msg);\n  }\n} catch (e) {\n  node.warn(\"Failed to parse LLM response: \" + e.message);\n  analysis = coerceAnalysis(null, msg);\n}\n\n// Accumulate results\nif (!Array.isArray(msg.analysisResults)) msg.analysisResults = [];\nmsg.analysisResults.push({\n  id: msg.currentConv ? msg.currentConv.id : undefined,\n  date: msg.currentConv ? msg.currentConv.date : undefined,\n  feedback: msg.currentConv ? msg.currentConv.feedback : undefined,\n  used_skus: (msg.currentConv && msg.currentConv.used_skus) ? msg.currentConv.used_skus : [],\n  analysis: analysis\n});\n\n// Next conversation\nmsg.currentIndex = (typeof msg.currentIndex === \"number\" ? msg.currentIndex : 0) + 1;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 850,
+        "y": 580,
+        "wires": [
+            [
+                "ff1ecb3d.eef91"
+            ]
+        ]
+    },
+    {
+        "id": "4267ba70.83af5c",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Finalize & Cache",
+        "func": "const analyses = msg.analysisResults || [];\nlet pc=0, nc=0;\nfor (const a of analyses){ if (a.feedback==='positive') pc++; if (a.feedback==='negative') nc++; }\n\nconst kpis = {\n  avgConversationLength: (analyses.length>0) ? Math.round(analyses.reduce((sum,a)=>sum + (a.chat_history ? a.chat_history.length : 3),0)/analyses.length) : 0,\n  skuMentionRate: (analyses.length>0) ? Math.round((analyses.filter(a=> (a.used_skus||[]).length>0).length/analyses.length)*100) : 0,\n  brandAnalysis: {},\n  priceRangeAnalysis: {'0-20':0,'21-50':0,'51-100':0,'100+':0}\n};\n\nfor (const a of analyses){\n  for (const sku of (a.used_skus||[])){\n    if (!kpis.brandAnalysis[sku.brand]) kpis.brandAnalysis[sku.brand] = {positive:0,negative:0,total:0};\n    kpis.brandAnalysis[sku.brand].total++;\n    if (a.feedback==='positive') kpis.brandAnalysis[sku.brand].positive++;\n    if (a.feedback==='negative') kpis.brandAnalysis[sku.brand].negative++;\n  }\n}\n\nmsg.payload = {\n  success: true,\n  environment: global.get('currentEnvironment') || 'qa',\n  counts: { positive: pc, negative: nc, total: analyses.length },\n  analyses,\n  enhancedKPIs: kpis,\n  dateRange: { startDate: msg.startDate, endDate: msg.endDate }\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 170,
+        "y": 600,
+        "wires": [
+            [
+                "5961842a.a5debc"
+            ]
+        ]
+    },
+    {
+        "id": "b53da8d4.e95698",
+        "type": "http response",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "x": 580,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "54d09347.c12464",
+        "type": "http in",
+        "z": "d3da3245.d67078",
+        "name": "GET /api/conversation",
+        "url": "/api/conversation",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 1040,
+        "wires": [
+            [
+                "4114b542.b2e7ac"
+            ]
+        ]
+    },
+    {
+        "id": "4114b542.b2e7ac",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Fetch Conversation by ID",
+        "func": "var getGlobal = (global.get ? global.get : (context.global && context.global.get ? context.global.get.bind(context.global) : null));\nif (!getGlobal) { node.error(\"Global context not available.\"); return msg; }\nvar requireGlobal = getGlobal('require');\nif (!requireGlobal) { node.error(\"Global 'require' not exposed.\"); return msg; }\nconst cp   = requireGlobal('child_process');\n\nconst curr = getGlobal('currentEnvironment') || 'qa';\nconst cfg  = getGlobal('environmentConfig') || { dbPath: '/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite' };\n\nfunction runSql(args){ try { return cp.execFileSync('sqlite3', args, {encoding:'utf8', timeout:5000}).toString(); } catch(e){ node.warn(\"sqlite3 error: \" + e.message); return ''; } }\nfunction sqlQuote(v){ return \"'\" + String(v).replace(/'/g,\"''\") + \"'\"; }\n\nvar q = (msg && msg.req && msg.req.query) ? msg.req.query : {};\nvar id = q.id;\nif (!id) { msg.statusCode=400; msg.payload={success:false,error:'id required'}; return msg; }\n\nvar out = runSql(['-readonly', cfg.dbPath, \"SELECT hex(json) FROM conversation_details WHERE id = \" + sqlQuote(id) + \" LIMIT 1\"]).trim();\nif (!out){ msg.statusCode=404; msg.payload={ success:false, error:'conversation not found', id:id, environment:curr }; return msg; }\n\nvar obj={};\ntry { obj = JSON.parse(Buffer.from(out,'hex').toString('utf8')); } catch(e){ obj={}; }\nvar chat = Array.isArray(obj.chat_history) ? obj.chat_history : [];\n\nmsg.payload = { success:true, environment:curr, conversation:{ id, chat_history: chat, raw: obj } };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 420,
+        "y": 1040,
+        "wires": [
+            [
+                "8bc5833c.779a1"
+            ]
+        ]
+    },
+    {
+        "id": "8bc5833c.779a1",
+        "type": "http response",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "x": 650,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "6b61ff43.f5f6e8",
+        "type": "http request",
+        "z": "d3da3245.d67078",
+        "name": "Call LLM API",
+        "method": "POST",
+        "ret": "obj",
+        "shouldUnZip": false,
+        "url": "https://34.27.123.72/v1/chat/completions",
+        "tls": "",
+        "x": 1110,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "26fffd8d.90e372",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Check Cache",
+        "func": "// Cache-first: if analysis_summary has a fresh record, return it immediately.\nvar requireGlobal = context.global.get('require');\nvar cp = requireGlobal('child_process');\nvar cfg = global.get('environmentConfig') || {};\nvar q = (msg && msg.req && msg.req.query) ? msg.req.query : {};\nvar start = (q.startDate || '').slice(0,10);\nvar end   = (q.endDate   || '').slice(0,10);\nvar limit = Math.max(1, Math.min(parseInt(q.limit||100,10), 100));\nvar cacheKey = (\"v1:\"+start+\":\"+end+\":\"+limit);\n\nfunction sqlite(args){ try { return cp.execFileSync('sqlite3', args, {encoding:'utf8', timeout:3000}).toString(); } catch(e){ return ''; } }\nnode.warn(cfg);\n\nif (!cfg.dbPath) { return [msg, null]; }\nvar row = sqlite([cfg.dbPath, \"SELECT kpi_data, analysis_data FROM analysis_summary WHERE cache_key='\"+cacheKey.replace(/'/g,\"''\")+\"' AND coalesce(expires_at, datetime('now')) > datetime('now') LIMIT 1\"]);\nnode.warn(row);\nif (row && row.trim()) {\n  try {\n    // sqlite3 without -json; split by default pipe if present, else parse as JSON tuple\n    var parts = row.trim().split(\"\\n\").slice(-1)[0].split(\"|\");\n    var kpi = JSON.parse(parts[0]);\n    var analyses = JSON.parse(parts[1] || \"[]\");\n    msg.payload = { success:true, enhancedKPIs:kpi, analyses:analyses, dateRange:{startDate:start, endDate:end} };\n    return [null, msg];\n  } catch(e){ /* miss -> continue */ }\n}\nreturn [msg, null];\n",
+        "outputs": 2,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 270,
+        "y": 460,
+        "wires": [
+            [
+                "9fc3eb28.739f58"
+            ],
+            [
+                "b53da8d4.e95698"
+            ]
+        ]
+    },
+    {
+        "id": "5961842a.a5debc",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Persist Summary",
+        "func": "var requireGlobal = context.global.get('require');\nvar cp = requireGlobal('child_process');\nvar cfg = global.get('environmentConfig') || {};\nvar p = msg.payload || {};\nif (!cfg.dbPath) return msg;\n\ntry {\n  var kpi = JSON.stringify(p.enhancedKPIs || {} ).replace(/'/g,\"''\");\n  var analyses = JSON.stringify(p.analyses || [] ).replace(/'/g,\"''\");\n  var start = (msg.startDate||'').slice(0,10);\n  var end   = (msg.endDate||'').slice(0,10);\n  var limit = (msg.max||100);\n  var cacheKey = (\"v1:\"+start+\":\"+end+\":\"+limit).replace(/'/g,\"''\");\n\n  var sql = \"INSERT OR REPLACE INTO analysis_summary \" +\n            \"(cache_key,start_date,end_date,limit_count,kpi_data,analysis_data,created_at,expires_at) \" +\n            \"VALUES ('\"+cacheKey+\"','\"+start+\"','\"+end+\"',\"+limit+\",'\"+kpi+\"','\"+analyses+\"',datetime('now'),datetime('now','+1 day'))\";\n  cp.execFileSync('sqlite3', [cfg.dbPath, sql], {encoding:'utf8', timeout:3000});\n} catch(e){ node.warn('persist summary failed: '+e.message); }\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 370,
+        "y": 640,
+        "wires": [
+            [
+                "b53da8d4.e95698"
+            ]
+        ]
+    },
+    {
+        "id": "48a0386f.345be8",
+        "type": "inject",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 660,
+        "y": 100,
+        "wires": [
+            [
+                "7ac600d6.94a2c"
+            ]
+        ]
+    },
+    {
+        "id": "7ac600d6.94a2c",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "func": "var require = context.global.get('require'); \n\nmsg.req = {};\nmsg.req.query = {};\nmsg.req.query.env = \"qa\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 920,
+        "y": 200,
+        "wires": [
+            [
+                "4c8d7e88.2d2bc8"
+            ]
+        ]
+    },
+    {
+        "id": "772c8e8b.1e31a8",
+        "type": "http in",
+        "z": "d3da3245.d67078",
+        "name": "POST /api/ingest",
+        "url": "/api/ingest",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 110,
+        "y": 740,
+        "wires": [
+            [
+                "83fc2f1c.a9532"
+            ]
+        ]
+    },
+    {
+        "id": "83fc2f1c.a9532",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Prepare IDs Query (DB-first)",
+        "func": "// 2-output: [skip HTTP (got IDs locally), call backend]\nconst requireGlobal = context.global.get('require');\nconst cp = requireGlobal('child_process');\nconst curr = global.get('currentEnvironment') || 'qa';\nconst cfg = global.get('environmentConfig') || { apiUrl:'https://ccpservices-qa.ulta.lcl', dbPath:'/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite' };\nfunction safe(c){ try { return cp.execSync(c,{encoding:'utf8',timeout:5000}).toString(); } catch(e){ return ''; } }\n\nlet body = msg.payload || {};\nlet startDate = body.startDate;\nlet endDate = body.endDate;\n\nif (!startDate || !/\\d{4}-\\d{2}-\\d{2}/.test(startDate)) {\n  const last = safe(\"sqlite3 -readonly '\" + cfg.dbPath + \"' \\\"SELECT last_sync_date FROM sync_status WHERE environment='\" + curr + \"' ORDER BY updated_at DESC LIMIT 1\\\"\").trim();\n  startDate = last || '2025-01-01';\n}\nif (!endDate || !/\\d{4}-\\d{2}-\\d{2}/.test(endDate)) {\n  endDate = new Date().toISOString().split('T')[0];\n}\n\nmsg.ingest = { startDate, endDate, processed:0, stored:0, analyzed:0, ids:[], index:0 };\n\n// Try DB first\nconst sep='|~|';\nconst local = safe(\"sqlite3 -readonly '\" + cfg.dbPath + \"' -separator '\" + sep + \"' \\\"SELECT id FROM conversation_ids WHERE date>='\" + startDate + \"' AND date<='\" + endDate + \"' ORDER BY date DESC\\\"\");\nnode.warn(local);\nif (local && local.trim()){\n  const ids = local.trim().split('\\n').map(s=>s.split(sep)[0]).filter(Boolean);\n  msg.ingest.ids = ids;\n  msg.ingest.index = 0;\n  node.warn(\"not going out\");\n  node.warn(msg);\n  return [msg, null];\n}\n\n// Else prepare HTTP\nmsg.url = cfg.apiUrl.replace(/\\/$/,'') + '/innovation/api/ccp/v1/interplay-conv-ai-lab/feedback/conversation-ids';\nmsg.method='POST';\nmsg.headers = {};\nmsg.headers = Object.assign({}, msg.headers, {\"Content-Type\":\"application/json\"});\ntry{\n  const env = requireGlobal('process').env || {};\n  const apiKey = env.ULTA_API_KEY || (global.get('ultaApiKey') || '');\n  const bearer = env.ULTA_API_BEARER || (global.get('ultaApiBearer') || '');\n  if (apiKey) msg.headers['x-api-key'] = apiKey;\n  if (bearer) msg.headers['Authorization'] = 'Bearer ' + bearer;\n}catch(e){}\nmsg.rejectUnauthorized=false;\nmsg.payload={\n  date_filter_type:\"Calendar Range\",\n  feedback_filter:\"All\",\n  timezone:\"CDT\",\n  limit_enabled:false,\n  limit_number:1000,\n  calendar_start_date:startDate,\n  calendar_end_date:endDate\n};\nnode.warn(\"going out\");\nnode.warn(msg);\nreturn [null, msg];",
+        "outputs": 2,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 350,
+        "y": 740,
+        "wires": [
+            [
+                "127c4fcb.b9f838"
+            ],
+            [
+                "74e62100.f90f98"
+            ]
+        ]
+    },
+    {
+        "id": "74e62100.f90f98",
+        "type": "http request",
+        "z": "d3da3245.d67078",
+        "name": "Fetch IDs (backend)",
+        "method": "use",
+        "ret": "obj",
+        "url": "",
+        "tls": "",
+        "x": 620,
+        "y": 700,
+        "wires": [
+            [
+                "127c4fcb.b9f838"
+            ]
+        ]
+    },
+    {
+        "id": "127c4fcb.b9f838",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Parse & Persist IDs",
+        "func": "const requireGlobal=context.global.get('require');\nconst cp=requireGlobal('child_process');\nconst cfg=global.get('environmentConfig')||{dbPath:'/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite'};\nfunction safe(c){try{return cp.execSync(c,{encoding:'utf8',timeout:5000}).toString();}catch(e){return ''}}\n\nlet ids = [];\nif (msg.payload && Array.isArray(msg.payload.conversation_ids)) {\n  ids = msg.payload.conversation_ids.map(x => (typeof x===\"string\" ? x.split(\" \")[0].split(\":\")[0] : x));\n} else if (msg.ingest && Array.isArray(msg.ingest.ids) && msg.ingest.ids.length) {\n  ids = msg.ingest.ids;\n}\nids = ids.filter(Boolean);\n\n// persist into conversation_ids (use startDate as date tag)\nconst d0 = (msg.ingest && msg.ingest.startDate) ? msg.ingest.startDate : new Date().toISOString().slice(0,10);\nfor (const id of ids){\n  const idEsc = String(id).replace(/'/g,\"''\");\n  const sql = \"INSERT OR IGNORE INTO conversation_ids(id,date) VALUES('\" + idEsc + \"','\" + d0 + \"')\";\n  try { cp.execFileSync('sqlite3',[cfg.dbPath, sql], {encoding:'utf8',timeout:3000}); } catch(e){}\n}\n\nmsg.ingest.ids = ids;\nmsg.ingest.index = 0;\nnode.warn(msg);\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 860,
+        "y": 740,
+        "wires": [
+            [
+                "75d0b427.200294"
+            ]
+        ]
+    },
+    {
+        "id": "75d0b427.200294",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Loop IDs",
+        "func": "if (!msg.ingest || msg.ingest.index >= msg.ingest.ids.length){\n  return [msg, null];\n}\nconst id = msg.ingest.ids[msg.ingest.index];\nmsg.detailId = id;\nreturn [null, msg];",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 130,
+        "y": 820,
+        "wires": [
+            [
+                "efad3b00.9f0138"
+            ],
+            [
+                "2ed74493.c84224"
+            ]
+        ]
+    },
+    {
+        "id": "2ed74493.c84224",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Prepare Detail Request (DB-first)",
+        "func": "function safeForServer(s){\n  s = String(s == null ? '' : s);\n  s = s.replace(/\\r\\n/g, '\\n');\n  s = s.replace(/[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])/g, '').replace(/(?<![\\uD800-\\uDBFF])[\\uDC00-\\uDFFF]/g, '');\n  s = s.replace(/\\\\(?![\\\\\\/\"bfnrtu])/g, '\\\\\\\\');\n  if (s.length > 8000) s = s.slice(0, 8000);\n  return s;\n}\n\nfunction csvParse(text){\n  var rows = [];\n  var i = 0, len = text.length, field = '', row = [], inQuotes = false;\n  while (i < len){\n    var ch = text[i];\n    if (inQuotes){\n      if (ch === '\"'){\n        if (i+1 < len && text[i+1] === '\"'){ field += '\"'; i += 2; continue; }\n        inQuotes = false; i++; continue;\n      }\n      field += ch; i++; continue;\n    } else {\n      if (ch === '\"'){ inQuotes = true; i++; continue; }\n      if (ch === ','){ row.push(field); field=''; i++; continue; }\n      if (ch === '\\n'){ row.push(field); rows.push(row); row=[]; field=''; i++; continue; }\n      if (ch === '\\r'){ i++; continue; }\n      field += ch; i++; continue;\n    }\n  }\n  row.push(field); rows.push(row);\n  return rows;\n}\n\nfunction loadCatalog(){\n  var cfg = global.get('environmentConfig') || {};\n  var path = cfg.catalogPath || '/Users/Arul329/Downloads/ulta_conv_ai/ulta_product_catalog.csv';\n  var requireGlobal = context.global.get('require');\n  var fs = requireGlobal('fs');\n  var stat = null;\n  try{ stat = fs.statSync(path); } catch(e){ return { map:{}, headers:[] }; }\n\n  var cache = global.get('ultaCatalog') || null;\n  if (cache && cache.mtime === String(stat.mtimeMs)){ return cache; }\n\n  var txt = '';\n  try{ txt = fs.readFileSync(path, 'utf8'); } catch(e){ return { map:{}, headers:[] }; }\n\n  var rows = csvParse(txt);\n  if (!rows.length) return { map:{}, headers:[] };\n  var headers = rows[0].map(function(h){ return String(h||'').trim(); });\n  var idx = { sku: headers.indexOf('sku'), name: headers.indexOf('name'), brand: headers.indexOf('brand'), price: headers.indexOf('price'), category: headers.indexOf('category') };\n  var map = {};\n  for (var r=1; r<rows.length; r++){\n    var row = rows[r];\n    var sku = String(row[idx.sku]||'').trim();\n    if (!sku) continue;\n    map[sku] = {\n      sku: sku,\n      name: String(row[idx.name]||'').trim(),\n      brand: String(row[idx.brand]||'').trim(),\n      price: String(row[idx.price]||'').trim(),\n      category: String(row[idx.category]||'').trim()\n    };\n  }\n  var out = { mtime: String(stat.mtimeMs), map: map, headers: headers };\n  global.set('ultaCatalog', out);\n  return out;\n}\n\nfunction extractSkusFromChat(chat){\n  var set = {};\n  for (var i=0;i<chat.length;i++){\n    var c = String((chat[i]&&chat[i].content)||'');\n    var matches = c.match(/\\b\\d{6,8}\\b/g) || [];\n    for (var j=0;j<matches.length;j++){ set[matches[j]] = true; }\n  }\n  return Object.keys(set);\n}\n\nfunction buildProductContext(skucodes, catalogMap){\n  var lines = [];\n  var used = [];\n  for (var i=0;i<skucodes.length;i++){\n    var code = skucodes[i];\n    var p = catalogMap[code];\n    if (p){\n      used.push(p);\n      var line = '- SKU ' + p.sku + ': ' + (p.name||'') + ' by ' + (p.brand||'') + (p.price?(' ($'+p.price+')'):'') + (p.category?(' ['+p.category+']'):'') ;\n      lines.push(line);\n    }\n  }\n  return { text: lines.length ? lines.join('\\n') : 'No specific products mentioned', used: used };\n}\n\nvar requireGlobal = context.global.get('require');\nvar cp = requireGlobal('child_process');\n\n// Resolve config\nvar cfg = global.get('environmentConfig') || {};\nif (!cfg.apiUrl) cfg.apiUrl = 'https://ccpservices-qa.ulta.lcl';\nif (!cfg.dbPath) cfg.dbPath = '/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite';\nnode.warn(msg);\n// Inputs\nvar id = msg.detailId;\nif (!id) { \n  // fail-safe: advance and return to loop to avoid spinning\n  if (msg.ingest) msg.ingest.index++;\n  return [msg, null, null]; \n}\n\n// Helpers\nfunction q(v){ return \"'\" + String(v).replace(/'/g, \"''\") + \"'\"; }\nfunction sqlOne(sql) {\n  try {\n    var out = cp.execFileSync('sqlite3', [cfg.dbPath, sql], {encoding:'utf8', timeout:3000}).trim();\n    return out || '';\n  } catch { return ''; }\n}\n\nfunction getJsonStrById(id) {\n  const idQ = \"'\" + String(id).replace(/'/g, \"''\") + \"'\";\n  // Fetch raw text first\n  const raw = sqlOne(`SELECT json FROM conversation_details WHERE id=${idQ} LIMIT 1`);\n  if (!raw) return null;\n\n  // If the DB happened to store hex (legacy runs), decode it.\n  // A pure-hex string of even length is a good heuristic.\n  const looksHex = /^[0-9A-F]+$/i.test(raw) && (raw.length % 2 === 0);\n  if (looksHex) {\n    try { return Buffer.from(raw, 'hex').toString('utf8'); } catch { /* fall through */ }\n  }\n  return raw;\n}\n\n// ... later:\n\n\n// 1) Check if we already have details in DB\nvar idQ = q(id);\n//var hex = sqlOne(`SELECT hex(json) FROM conversation_details WHERE id=${idQ} LIMIT 1`);\nvar jsonStr = getJsonStrById(id);\n\n//node.warn(hex + \" : \" + idQ);\nif (jsonStr) {\n  // If analysis exists, advance and return to loop\n  var haveAnalysis = !!sqlOne(`SELECT 1 FROM conversation_analysis WHERE id=${idQ} LIMIT 1`);\n  if (haveAnalysis) {\n    if (msg.ingest) msg.ingest.index++;\n    return [msg, null, null];\n  }\n\n  // No analysis yet. Build LLM request if the chat has feedback; else skip.\n  //var jsonStr = Buffer.from(hex, 'hex').toString('utf8');\n  var obj = {};\n  try { obj = JSON.parse(jsonStr); } catch {}\n  var chat = Array.isArray(obj.chat_history) ? obj.chat_history : [];\n  var feedback = 'none';\n  for (var i=0;i<chat.length;i++){\n    var c = (chat[i] && chat[i].content) || '';\n    if (c.indexOf('👎')!==-1){ feedback='negative'; break; }\n    if (c.indexOf('👍')!==-1){ feedback='positive'; break; }\n  }\n  if (feedback === 'none') { \n    if (msg.ingest) msg.ingest.index++;\n    return [msg, null, null]; \n  }\n\n  // Build product context from catalog\n  var catalog = loadCatalog();\n  var skus = extractSkusFromChat(chat);\n  var ctx = buildProductContext(skus, catalog.map);\n\n  function normRole(r){ return (r === 'assistant') ? 'assistant' : 'user'; }\n  var messages = [];\n  var systemPrompt = 'You are an expert customer service analyst for Ulta Beauty. Analyze the following conversation and provide insights.\\n\\n' +\n    'Product Context:\\n' + ctx.text + '\\n\\n' +\n    'Focus on: what likely influenced the customer feedback (positive/negative), product fit, price/value, and guidance for a better outcome.\\n' +\n    'Return only a compact JSON object with keys: reason, priority, recommendations, sentiment_score, category.';\n  messages.push({ role: 'system', content: safeForServer(systemPrompt) });\n  for (var j=0;j<chat.length;j++){\n    var txt = safeForServer(chat[j] && chat[j].content != null ? chat[j].content : '');\n    messages.push({ role: normRole(chat[j].role), content: safeForServer(txt) });\n  }\n  var fb = feedback==='negative' ? 'Negative 👎' : 'Positive 👍';\n  var finalInstr = 'Given the conversation above, produce the JSON. Feedback: ' + fb + '. JSON only, no prose.';\n  messages.push({ role: 'user', content: safeForServer(finalInstr) });\n\n  msg.llmPayload = { model:'gpt-4o-mini', messages: messages, temperature:0.3, max_tokens: 800 };\n  msg.payload = msg.llmPayload;\n  msg.headers = {};\n  msg.currentConv = { id: id, date: (obj.date||'').slice(0,10), feedback: feedback, used_skus: ctx.used };\n\n  try {\n    var key = (requireGlobal('process').env.ULTA_LLM_KEY || global.get('llmKey') || '');\n    msg.headers = Object.assign({}, msg.headers, {\n      Authorization: 'Bearer ' + key,\n      'Content-Type': 'application/json',\n      'Accept': 'application/json'\n    });\n  } catch {}\n  msg.rejectUnauthorized = false;\n\n  // Send to LLM (output 1)\n  return [null, msg, null];\n}\n\n// 2) DB MISS -> configure backend request (critical)\nvar apiUrl = cfg.apiUrl || 'https://ccpservices-qa.ulta.lcl';\nmsg.url = apiUrl.replace(/\\/$/,'') + '/innovation/api/ccp/v1/interplay-conv-ai-lab/feedback/conversation-details';\nmsg.method = 'POST';\nmsg.headers = {};\nmsg.headers = Object.assign({}, msg.headers, {'Content-Type':'application/json'});\n\n// Optional: add keys/bearer if present in globals/env\ntry {\n  var env = requireGlobal('process').env || {};\n  var apiKey = env.ULTA_API_KEY || (global.get('ultaApiKey') || '');\n  var bearer = env.ULTA_API_BEARER || (global.get('ultaApiBearer') || '');\n  if (apiKey) msg.headers['x-api-key'] = apiKey;\n  if (bearer) msg.headers['Authorization'] = 'Bearer ' + bearer;\n} catch {}\n\nmsg.rejectUnauthorized = false;\n\n// Backend payload. If your API needs date range, uncomment:\nmsg.payload = {\n  conversation_id: id\n  // , startDate: msg.ingest && msg.ingest.startDate\n  // , endDate:   msg.ingest && msg.ingest.endDate\n};\nnode.warn(msg);\n// No spammy warn here; just route to backend (output 2)\nreturn [null, null, msg];\n",
+        "outputs": 3,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 410,
+        "y": 820,
+        "wires": [
+            [
+                "75d0b427.200294"
+            ],
+            [
+                "701e934.8d4f16c"
+            ],
+            [
+                "83195fb0.b9ebb8"
+            ]
+        ]
+    },
+    {
+        "id": "83195fb0.b9ebb8",
+        "type": "http request",
+        "z": "d3da3245.d67078",
+        "name": "Fetch Detail (backend)",
+        "method": "use",
+        "ret": "obj",
+        "url": "",
+        "tls": "",
+        "x": 880,
+        "y": 820,
+        "wires": [
+            [
+                "1dd2d161.1b6637"
+            ]
+        ]
+    },
+    {
+        "id": "1dd2d161.1b6637",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Store Detail + Maybe LLM",
+        "func": "// Store Detail + Maybe LLM (shell-only, hardened) — stable id, stdin SQL, verified insert\n\nvar requireGlobal = context.global.get('require');\nvar cp   = requireGlobal('child_process');\nvar fs   = requireGlobal('fs');\nvar path = requireGlobal('path');\nvar os   = requireGlobal('os');\n\nfunction resolveDbPath() {\n  if (process.env.INTERPLAY_DB && fs.existsSync(process.env.INTERPLAY_DB)) return process.env.INTERPLAY_DB;\n  var candidates = [\n    '/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite',\n    path.join(process.cwd(), 'DATA', 'ulta_conv_ai_qa.sqlite'),\n    '/interplay_v2/DATA/ulta_conv_ai_qa.sqlite',\n    path.join(os.homedir(), 'InterplayApp', 'interplay_v2', 'DATA', 'ulta_conv_ai_qa.sqlite')\n  ];\n  for (var c of candidates) { try { if (fs.existsSync(c)) return c; } catch(e){} }\n  var dir = path.join(process.cwd(), 'DATA'); try { fs.mkdirSync(dir, {recursive:true}); } catch(e){}\n  return path.join(dir, 'ulta_conv_ai_qa.sqlite');\n}\n\nvar cfg = global.get('environmentConfig') || {};\nif (!cfg.dbPath) {\n  cfg.dbPath = resolveDbPath();\n  cfg.environment = cfg.environment || (process.env.INTERPLAY_ENV || 'qa');\n  global.set('environmentConfig', cfg);\n}\n\nfunction escSQL(s){\n  // Escape single quotes for SQL literals\n  return String(s == null ? '' : s).replace(/'/g, \"''\");\n}\nfunction toObject(x) {\n  if (!x) return {};\n  if (typeof x === 'string') {\n    try { return JSON.parse(x); } catch { return {}; }\n  }\n  return x;\n}\nfunction extractChat(body) {\n  if (Array.isArray(body.chat_history)) return body.chat_history;\n  if (body.conversation_detail && Array.isArray(body.conversation_detail.chat_history)) {\n    return body.conversation_detail.chat_history;\n  }\n  return [];\n}\n\n// 1) Validate id\nif (!msg.detailId || !String(msg.detailId).trim()) {\n  node.warn('[Store Detail] Missing/empty msg.detailId; skipping to avoid loop.');\n  if (msg.ingest) msg.ingest.index++;\n  return msg;\n}\nvar id = String(msg.detailId).trim();\nvar dateISO = new Date().toISOString().slice(0,19).replace('T',' ');\n\n// 2) Normalize payload and build compact JSON doc\nvar body = toObject(msg.payload);\nvar chat = extractChat(body);\nvar jsonDoc = JSON.stringify({ chat_history: chat });\n\n// 3) Ensure table exists (stdin; no .parameter)\ntry {\n  cp.execFileSync('sqlite3', ['-batch', cfg.dbPath], {\n    input:\n      \"BEGIN;\\n\" +\n      \"CREATE TABLE IF NOT EXISTS conversation_details (\\n\" +\n      \"  id   TEXT PRIMARY KEY NOT NULL,\\n\" +\n      \"  date TEXT NOT NULL,\\n\" +\n      \"  json TEXT NOT NULL\\n\" +\n      \");\\n\" +\n      \"COMMIT;\\n\",\n    encoding: 'utf8',\n    timeout: 8000\n  });\n} catch (e) {\n  node.warn('[Store Detail] ensure table failed: ' + e.message);\n  // Still continue; table may already exist\n}\n\n// 4) Upsert using a single stdin SQL script (reliable across sqlite versions)\ntry {\n  var sql =\n    \"BEGIN;\\n\" +\n    \"INSERT OR REPLACE INTO conversation_details(id,date,json)\\n\" +\n    \"VALUES('\" + escSQL(id) + \"','\" + escSQL(dateISO) + \"','\" + escSQL(jsonDoc) + \"');\\n\" +\n    \"COMMIT;\\n\";\n  cp.execFileSync('sqlite3', ['-batch', cfg.dbPath], {\n    input: sql,\n    encoding: 'utf8',\n    timeout: 8000\n  });\n\n  // 5) Verify insert; if it failed for any reason, warn and still advance index to avoid spin\n  var verify = cp.execFileSync('sqlite3', [cfg.dbPath,\n    \"SELECT id, length(json) FROM conversation_details WHERE id='\" + escSQL(id) + \"' LIMIT 1;\"\n  ], { encoding: 'utf8', timeout: 5000 }).trim();\n\n  if (!verify) {\n    node.warn('[Store Detail] VERIFY FAILED: no row for id=' + id);\n  } else {\n    // Optional: uncomment to see confirmation\n    // node.warn('[Store Detail] inserted: ' + verify);\n    if (msg.ingest) msg.ingest.stored = (msg.ingest.stored || 0) + 1;\n  }\n\n} catch (e) {\n  node.warn('[Store Detail] upsert failed: ' + e.message + ' (id=' + id + ')');\n  // Advance index anyway to avoid infinite loop\n  if (msg.ingest) msg.ingest.index++;\n  return msg;\n}\n\n// 6) Advance loop\nif (msg.ingest) {\n  msg.ingest.processed = (msg.ingest.processed || 0) + 1;\n  msg.ingest.index++;\n}\n\nreturn msg;\n",
+        "outputs": 3,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 910,
+        "y": 940,
+        "wires": [
+            [
+                "75d0b427.200294"
+            ],
+            [
+                "701e934.8d4f16c"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "701e934.8d4f16c",
+        "type": "http request",
+        "z": "d3da3245.d67078",
+        "name": "LLM (Ingest)",
+        "method": "POST",
+        "ret": "obj",
+        "shouldUnZip": false,
+        "url": "http://127.0.0.1:1234/v1/chat/completions",
+        "tls": "",
+        "x": 1110,
+        "y": 760,
+        "wires": [
+            [
+                "68ebb2e5.082404"
+            ]
+        ]
+    },
+    {
+        "id": "68ebb2e5.082404",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Store Analysis",
+        "func": "const requireGlobal=context.global.get('require');\nconst cp=requireGlobal('child_process');\nconst cfg=global.get('environmentConfig')||{dbPath:'/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite'};\n\nfunction safe(c){ try { return cp.execSync(c,{encoding:'utf8',timeout:5000}).toString(); } catch(e){ return ''; } }\n\nlet analysis={reason:'Analysis failed',priority:'Medium',recommendations:['Review manually'],sentiment_score:0.5,category:'other'};\ntry {\n  if (msg.payload && msg.payload.choices && msg.payload.choices[0]){\n    const content=String(msg.payload.choices[0].message.content||'').trim();\n    const m=content.match(/\\{[\\s\\S]*\\}/);\n    if (m){ analysis = JSON.parse(m[0]); }\n  } else if (msg.payload && msg.payload.error){\n    node.warn(\"LLM error: \" + (msg.payload.error.message || JSON.stringify(msg.payload.error)));\n  }\n} catch(e){}\n\nconst skusJson = JSON.stringify(msg.currentConv.used_skus||[]).replace(/'/g,\"''\");\nconst aJson    = JSON.stringify(analysis).replace(/'/g,\"''\");\n\nsafe(\"sqlite3 '\" + cfg.dbPath + \"' \\\"INSERT OR REPLACE INTO conversation_analysis(id,date,feedback,used_skus,analysis) VALUES('\" + msg.currentConv.id + \"','\" + msg.currentConv.date + \"','\" + msg.currentConv.feedback + \"','\" + skusJson + \"','\" + aJson + \"')\\\"\");\n\nmsg.ingest.analyzed++;\nmsg.ingest.index++;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1270,
+        "y": 900,
+        "wires": [
+            [
+                "75d0b427.200294"
+            ]
+        ]
+    },
+    {
+        "id": "efad3b00.9f0138",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "Finalize Ingest",
+        "func": "var getGlobal = (global.get ? global.get : (context.global && context.global.get ? context.global.get.bind(context.global) : null));\nif (!getGlobal) { node.error(\"Global context not available.\"); return msg; }\nvar requireGlobal = getGlobal('require');\nif (!requireGlobal) { node.error(\"Global 'require' not exposed.\"); return msg; }\nconst cp = requireGlobal('child_process');\n\nconst curr = (getGlobal('currentEnvironment') || 'qa');\nconst cfg  = (getGlobal('environmentConfig') || { dbPath: '/Users/Arul329/InterplayApp/interplay_v2/DATA/ulta_conv_ai_qa.sqlite' });\n\nconst ingest = (msg && msg.ingest) ? msg.ingest : {};\nconst startDate = ingest.startDate || '';\nconst endDate   = ingest.endDate || '';\nconst idsLen    = Array.isArray(ingest.ids) ? ingest.ids.length : 0;\nconst lastSyncDate = endDate || startDate || '';\n\nfunction sqlQuote(v){ return \"'\" + String(v).replace(/'/g,\"''\") + \"'\"; }\nfunction sqlite(args){\n  try { return cp.execFileSync('sqlite3', args, {encoding:'utf8', timeout:5000}).toString(); }\n  catch(e){ node.warn(\"sqlite3 error: \" + e.message); return ''; }\n}\n\nsqlite([cfg.dbPath, \"CREATE TABLE IF NOT EXISTS sync_status (id INTEGER PRIMARY KEY, environment TEXT, last_sync_date TEXT, total_conversations INTEGER, updated_at TEXT)\"]);\n\nconst sql = \"INSERT OR REPLACE INTO sync_status (id, environment, last_sync_date, total_conversations, updated_at) VALUES (1, \" + sqlQuote(curr) + \", \" + sqlQuote(lastSyncDate) + \", \" + idsLen + \", datetime('now'))\";\nsqlite([cfg.dbPath, sql]);\n\nmsg.payload = {\n  success: true,\n  environment: curr,\n  message: \"Ingest complete\",\n  summary: {\n    dateRange: { start: startDate, end: endDate },\n    ids: idsLen,\n    stored: ingest.stored || 0,\n    analyzed: ingest.analyzed || 0\n  }\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 310,
+        "y": 920,
+        "wires": [
+            [
+                "f4bc22e8.01151"
+            ]
+        ]
+    },
+    {
+        "id": "f4bc22e8.01151",
+        "type": "http response",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "x": 580,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "963b3b1a.be2358",
+        "type": "console",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "true",
+        "x": 900,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "673a3524.2b58f4",
+        "type": "function",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "func": "var require = context.global.get('require'); \nreturn msg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1230,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ef6ae3ea.0dd4",
+        "type": "inject",
+        "z": "d3da3245.d67078",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 1170,
+        "y": 460,
+        "wires": [
+            [
+                "673a3524.2b58f4"
+            ]
+        ]
+    }
+]

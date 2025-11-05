@@ -1,0 +1,1303 @@
+[
+    {
+        "id": "8e3e3fa4.3f394",
+        "type": "tab",
+        "label": "AI Research Agent",
+        "disabled": false,
+        "info": "Handles uploading PDF papers or fetching from arXiv"
+    },
+    {
+        "id": "98d9ac3f.6dc928",
+        "type": "AI-Agent-Init-Workflow",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-Init-Workflow",
+        "func": "\nreturn msg",
+        "outputs": 1,
+        "x": 1230,
+        "y": 200,
+        "wires": [
+            [
+                "e68c605e.9bddf"
+            ]
+        ]
+    },
+    {
+        "id": "c04575ad.85955",
+        "type": "AI-Agent-Workflow-Routes",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-Workflow-Routes",
+        "start_node": "chat_bot",
+        "routes": [
+            {
+                "source": "chat_bot",
+                "type": "Edge",
+                "target": "summarizer",
+                "continueValue": "",
+                "endValue": "false",
+                "callTool": ""
+            },
+            {
+                "source": "summarizer",
+                "type": "Edge",
+                "target": "END",
+                "continueValue": "",
+                "endValue": "false",
+                "callTool": ""
+            }
+        ],
+        "func": "\nreturn msg",
+        "outputs": 1,
+        "x": 1250,
+        "y": 438,
+        "wires": [
+            [
+                "8224a90.0faaad8"
+            ]
+        ]
+    },
+    {
+        "id": "74571c5a.237c4c",
+        "type": "AI-Agent-Memory",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-Memory",
+        "memory_type": "in-memory",
+        "path": "",
+        "outputs": 1,
+        "x": 1220,
+        "y": 520,
+        "wires": [
+            [
+                "cdd0f8f8.d4c6d"
+            ]
+        ]
+    },
+    {
+        "id": "f2c62c8d.b578a8",
+        "type": "AI-Agent-Compile-Workflow",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-Compile-Workflow",
+        "func": "\nreturn msg",
+        "outputs": 1,
+        "x": 1250,
+        "y": 600,
+        "wires": [
+            [
+                "6cb2cd53.13890c"
+            ]
+        ]
+    },
+    {
+        "id": "f4c268e4.b1742",
+        "type": "AI-Agent-Invoke",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-Invoke",
+        "func": "\nreturn msg",
+        "outputs": 1,
+        "x": 1210,
+        "y": 678,
+        "wires": [
+            [
+                "f7c4aaad.55dab"
+            ]
+        ]
+    },
+    {
+        "id": "f4145be4.2c2508",
+        "type": "AI-Agent-Node",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-Node",
+        "agents": [
+            {
+                "agent_name": "chat_bot",
+                "system_message": "you are a user chat_bot. chat with user more interactivly. use web search if required",
+                "selected_tools": [
+                    "web_search"
+                ]
+            },
+            {
+                "agent_name": "summarizer",
+                "system_message": "suammrize the context shortly",
+                "selected_tools": []
+            }
+        ],
+        "func": "\nreturn msg",
+        "outputs": 1,
+        "x": 1210,
+        "y": 360,
+        "wires": [
+            [
+                "b9a3a152.9222b"
+            ]
+        ]
+    },
+    {
+        "id": "3dd96a7a.e0d8ee",
+        "type": "AI-Agent-Tools",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-Tools",
+        "tool_node_name": "call_tool",
+        "web_search": "false",
+        "x": 1210,
+        "y": 278,
+        "wires": [
+            [
+                "f60a2a5a.c891b"
+            ]
+        ]
+    },
+    {
+        "id": "e68c605e.9bddf",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Post Agent Initialization",
+        "func": "node.warn(msg.payload);\n\nif (msg.payload.message === \"Agent workflow initiated successfully\" ) {\n    node.status({fill:\"green\",shape:\"dot\",text:\"Done\"});\n    return msg; // Return the status for further processing\n} else {\n    return null; // Return the status for error or unexpected conditions\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1530,
+        "y": 200,
+        "wires": [
+            [
+                "a9516d40.3a3ad"
+            ]
+        ]
+    },
+    {
+        "id": "f60a2a5a.c891b",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Post Agent Tools Initialization",
+        "func": "node.warn(msg.payload);\nif (msg.payload.message === \"AI Tools Manager initialized successfully\" ) {\n    node.status({fill:\"green\",shape:\"dot\",text:\"Done\"});\n    return msg; // Return the status for further processing\n} else {\n    return null; // Return the status for error or unexpected conditions\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1550,
+        "y": 278,
+        "wires": [
+            [
+                "f4145be4.2c2508"
+            ]
+        ]
+    },
+    {
+        "id": "b9a3a152.9222b",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Post Agent Node Initialization",
+        "func": "node.warn(msg.payload);\nif (msg.payload.message === \"Agent workflow Node initiated successfully\" ) {\n    node.status({fill:\"green\",shape:\"dot\",text:\"Done\"});\n    return msg; // Return the status for further processing\n} else {\n    return null; // Return the status for error or unexpected conditions\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1550,
+        "y": 360,
+        "wires": [
+            [
+                "c04575ad.85955"
+            ]
+        ]
+    },
+    {
+        "id": "8224a90.0faaad8",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Post Agent Workflow Routes Initialization",
+        "func": "node.warn(msg.payload);\nif (msg.payload.message === \"Agent workflow initiated successfully\" ) {\n    node.status({fill:\"green\",shape:\"dot\",text:\"Done\"});\n    return msg; // Return the status for further processing\n} else {\n    return null; // Return the status for error or unexpected conditions\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1590,
+        "y": 438,
+        "wires": [
+            [
+                "74571c5a.237c4c"
+            ]
+        ]
+    },
+    {
+        "id": "cdd0f8f8.d4c6d",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Post Agent Memory Initialization",
+        "func": "node.warn(msg.payload);\nif (msg.payload.message === \"Agent memory initialized successfully\" ) {\n    node.status({fill:\"green\",shape:\"dot\",text:\"Done\"});\n    return msg; // Return the status for further processing\n} else {\n    return null; // Return the status for error or unexpected conditions\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1560,
+        "y": 520,
+        "wires": [
+            [
+                "f2c62c8d.b578a8"
+            ]
+        ]
+    },
+    {
+        "id": "6cb2cd53.13890c",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Post Agent Workflow Compilation",
+        "func": "node.warn(msg.payload);\nif (msg.payload.message === \"Agent workflow compiled successfully\" ) {\n    node.status({fill:\"green\",shape:\"dot\",text:\"Done\"});\n    global.set(\"RESEARCH_AGENT_WORKFLOW_READY\", true);  // ✅ Set flag\n    return msg; // Return the status for further processing\n} else {\n    return null; // Return the status for error or unexpected conditions\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1570,
+        "y": 600,
+        "wires": [
+            [
+                "c3466ac6.ca24f8"
+            ]
+        ]
+    },
+    {
+        "id": "f7c4aaad.55dab",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "var require = context.global.get('require');\n\nmsg['res'] = context.global.get(msg._msgid + 'res').res;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1414,
+        "y": 678,
+        "wires": [
+            [
+                "92c7325.ab8645"
+            ]
+        ]
+    },
+    {
+        "id": "92c7325.ab8645",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Stream Output Function",
+        "func": "const mysql = context.global.get('mysql_conn');\n\nmsg['res'] = context.global.get(msg._msgid + 'res').res;\n\nconst isFinalResponse = msg.payload.finalResponse;\n\nif (!isFinalResponse) {\n    // Stream response if not final\n    msg.res.status(200).write(msg.payload.mssg);\n    msg.res.flush();\n    node.send(msg);\n} else {\n    // Extract file details if available\n    if (msg.payload.files_payload && Object.keys(msg.payload.files_payload).length > 0) {\n        const fileTypeKey = Object.keys(msg.payload.files_payload)[0]; // Always take the 0th index key\n        const fileType = msg.payload.files_payload[fileTypeKey]; // Get the file type value\n        const fileData = msg.payload.files_payload.data; // Get the file data\n    \n        msg.res.write(JSON.stringify({\n            fileType: fileType,\n            fileData: fileData\n        }));\n    \n        node.warn(`File ready for download: Type - ${fileType}`);\n    } else {\n        // If no file is present, send an empty response\n        msg.res.write(JSON.stringify({}));\n    }\n\n    msg.res.end();\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1660,
+        "y": 678,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "370c8194.914256",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Set Config to GLOBAL",
+        "func": "var require = context.global.get('require'); \nvar uuid = require('uuid'); // Import uuid to generate unique thread_id\n\n// Generate a unique thread_id\nvar thread_id = uuid.v4();\n\n// Set the thread_id in msg.payload\nmsg.payload.thread_id = thread_id;\n\n// Store the config in global context\ncontext.global.set(\"AGENT_FLOW_CONFIG\", msg.payload);\nglobal.set(\"RESEARCH_AGENT_WORKFLOW_READY\", false);  // ✅ Set flag\n\n\n\nnode.warn(msg.payload);\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 394,
+        "y": 120,
+        "wires": [
+            [
+                "a15292fe.65f96"
+            ]
+        ]
+    },
+    {
+        "id": "b383e91b.928578",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "url": "/start_ai_chatbot",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 170,
+        "y": 980,
+        "wires": [
+            [
+                "f56c0ce3.d0dff"
+            ]
+        ]
+    },
+    {
+        "id": "f56c0ce3.d0dff",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "var require = context.global.get('require');\n\nmsg.payload = {\n    \"message\": \"Welcome to AI Agent ChatBot! I'm your personal chatbot. Feel free to ask me anything!\",\n    \"questions\":[]\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 410,
+        "y": 980,
+        "wires": [
+            [
+                "ce150912.278a38"
+            ]
+        ]
+    },
+    {
+        "id": "ce150912.278a38",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 605,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "e256cfb2.7d58c8",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "url": "/ai-agent-chat-bot/:flow_id",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 210,
+        "y": 1040,
+        "wires": [
+            [
+                "320d5c6e.c1ceb4"
+            ]
+        ]
+    },
+    {
+        "id": "e6a27f95.dcbbd8",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 660,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "320d5c6e.c1ceb4",
+        "type": "template",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>AI Agent ChatBot</title>\n    <style>\n        .styled-link {\n            color: #1a73e8;\n            text-decoration: none;\n            font-weight: bold;\n        }\n        .styled-link:hover {\n            text-decoration: underline;\n        }\n    </style>\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n    <script defer=\"defer\" src=\"/mic/AI-Agent-Chatbot/main.js\"></script>\n    <link href=\"/mic/AI-Agent-Chatbot/main.css\" rel=\"stylesheet\">\n</head>\n<body>\n\n<script>\n    // Extract flow_id from URL and store in local storage\n    document.addEventListener(\"DOMContentLoaded\", function() {\n        // Extract flow_id from the path\n        const pathParts = window.location.pathname.split('/');\n        const flowId = pathParts[pathParts.length - 1];  // flow_id should be the last part of the path\n    \n        if (flowId) {\n            localStorage.setItem(\"flow_id\", flowId);\n        }\n    \n        console.log(\"Stored Flow ID:\", localStorage.getItem(\"flow_id\")); // Debugging\n    });\n\n</script>\n\n<div id=\"root\"></div>\n\n</body>\n</html>\n",
+        "output": "str",
+        "x": 480,
+        "y": 1040,
+        "wires": [
+            [
+                "e6a27f95.dcbbd8"
+            ]
+        ]
+    },
+    {
+        "id": "325e4bce.afa68c",
+        "type": "AI-Agent-VectorDB",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-VectorDB",
+        "model_dir": "",
+        "outputs": 1,
+        "x": 1244,
+        "y": 119,
+        "wires": [
+            [
+                "ec0f13d8.cbf9a8"
+            ]
+        ]
+    },
+    {
+        "id": "ec0f13d8.cbf9a8",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Post Vector Database Creation",
+        "func": "node.warn(msg.payload);\n\nif (msg.status === \"Success: Vector database built successfully\" || msg.status === \"Vector database already exists\" || msg.status === \"Success: No files provided – nothing to build\") {\n    node.status({fill:\"green\",shape:\"dot\",text:\"Done\"});\n    return msg; // Return the status for further processing\n} else {\n    return null; // Return the status for error or unexpected conditions\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1560,
+        "y": 119,
+        "wires": [
+            [
+                "98d9ac3f.6dc928"
+            ]
+        ]
+    },
+    {
+        "id": "a15292fe.65f96",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Retriever Tool",
+        "func": "var agents = msg.payload.agent_workflow.agents;\nvar foundRetriever = false;\n\n// Iterate through the agents object\nfor (var agentKey in agents) {\n    if (agents.hasOwnProperty(agentKey)) {\n        var agent = agents[agentKey];\n        // Iterate over the tools of each agent\n        for (var toolKey in agent.tools) {\n            if (agent.tools.hasOwnProperty(toolKey) && agent.tools[toolKey].name === 'retriever') {\n                foundRetriever = true;\n                break;\n            }\n        }\n        if (foundRetriever) break; // Exit the loop if retriever is found\n    }\n}\n\nmsg.foundRetriever = foundRetriever;\nnode.warn(foundRetriever);\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 631,
+        "y": 120,
+        "wires": [
+            [
+                "671f7c55.1e986c"
+            ]
+        ]
+    },
+    {
+        "id": "671f7c55.1e986c",
+        "type": "switch",
+        "z": "8e3e3fa4.3f394",
+        "name": "Check if retriever tool found",
+        "property": "foundRetriever",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true",
+                "v": "",
+                "vt": "str"
+            },
+            {
+                "t": "false",
+                "v": "",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 674,
+        "y": 178,
+        "wires": [
+            [
+                "b99f6ed.4430f1"
+            ],
+            [
+                "23b5436.407f2bc"
+            ]
+        ]
+    },
+    {
+        "id": "7f857974.12645",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "Trigger AI Agent",
+        "url": "/trigger-research-agent",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 120,
+        "wires": [
+            [
+                "370c8194.914256"
+            ]
+        ]
+    },
+    {
+        "id": "23b5436.407f2bc",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "var require = context.global.get('require'); \n\nnode.warn(msg);\n\nconst res = {res: msg.res};\ncontext.global.set(msg._msgid+'res', res)\nvar newmsg = {};  // Define newmsg variable\nnewmsg.payload = msg.payload\n\n\nreturn newmsg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 970,
+        "y": 198,
+        "wires": [
+            [
+                "98d9ac3f.6dc928"
+            ]
+        ]
+    },
+    {
+        "id": "b99f6ed.4430f1",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "var require = context.global.get('require'); \n\nnode.warn(msg);\n\nconst res = {res: msg.res};\ncontext.global.set(msg._msgid+'res', res)\nvar newmsg = {};  // Define newmsg variable\nnewmsg.payload = msg.payload\n\n\nreturn newmsg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 954,
+        "y": 119,
+        "wires": [
+            [
+                "325e4bce.afa68c"
+            ]
+        ]
+    },
+    {
+        "id": "2fef224d.6b1966",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "url": "/api/agent-chat-logs/get/:session_id",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 240,
+        "y": 1100,
+        "wires": [
+            [
+                "d0d38426.a869d8"
+            ]
+        ]
+    },
+    {
+        "id": "d88d67fa.1eb568",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 780,
+        "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "4c183b77.a7f24c",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "url": "/api/agent-chat-logs",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 190,
+        "y": 1160,
+        "wires": [
+            [
+                "3091bee0.3a1912"
+            ]
+        ]
+    },
+    {
+        "id": "8ff74037.34b68",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 660,
+        "y": 1160,
+        "wires": []
+    },
+    {
+        "id": "d0d38426.a869d8",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Get Chat History",
+        "func": "const require = global.get('require');\nconst sqlite3 = require('sqlite3').verbose();\nconst path = require('path');\n\nconst session_id = msg.req && msg.req.params && msg.req.params.session_id;\nconst flow_id = msg.req && msg.req.query && msg.req.query.flow_id;\n\nif (!session_id || !flow_id) {\n    msg.payload = { error: \"Missing session_id or flow_id\" };\n    msg.statusCode = 400;\n    return node.send([msg, null]);\n}\n\n// Set the correct SQLite DB path\nconst dbPath = path.join('/interplay_v2/config', 'iterate_agents.sqlite');\n\n// Open DB\nconst db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {\n    if (err) {\n        msg.payload = { error: \"DB connection failed: \" + err.message };\n        msg.statusCode = 500;\n        return node.send([null, msg]);\n    }\n\n    const sql = `\n        SELECT session_id, message \n        FROM chats \n        WHERE session_id = ? AND flow_id = ?\n        ORDER BY date ASC\n    `;\n\n    db.all(sql, [session_id, flow_id], (err, rows) => {\n        if (err) {\n            msg.payload = { error: \"Query failed: \" + err.message };\n            msg.statusCode = 500;\n            return node.send([null, msg]);\n        }\n\n        const response = [];\n\n        for (let i = 0; i < rows.length; i++) {\n            try {\n                const msgJson = JSON.parse(rows[i].message);\n\n                if (\n                    msgJson &&\n                    msgJson.data &&\n                    msgJson.data.content &&\n                    msgJson.data.content !== \"None\"\n                ) {\n                    if (msgJson.type === 'ai') {\n                        response.push({ bot: { mssg: msgJson.data.content } });\n                    } else {\n                        response.push({ user: { mssg: msgJson.data.content } });\n                    }\n                }\n            } catch (e) {\n                node.warn(\"Failed to parse message JSON: \" + e);\n            }\n        }\n\n        msg.payload = response;\n        db.close();\n        return node.send([msg, null]);\n    });\n});\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 570,
+        "y": 1100,
+        "wires": [
+            [
+                "d88d67fa.1eb568"
+            ]
+        ]
+    },
+    {
+        "id": "3091bee0.3a1912",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Get Chats History",
+        "func": "const require = global.get('require');\nconst sqlite3 = require('sqlite3').verbose();\nconst path = require('path');\n\nconst dbPath = path.join('/interplay_v2/config', 'iterate_agents.sqlite');\n\nlet flow_id = null;\nif (msg.req && msg.req.query) {\n    flow_id = msg.req.query.flow_id;\n}\n\nif (!flow_id) {\n    msg.payload = { error: \"Missing flow_id in request\" };\n    msg.statusCode = 400;\n    return node.send([msg, null]);\n}\n\n\nconst db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {\n    if (err) {\n        msg.payload = { error: \"DB connection failed: \" + err.message };\n        msg.statusCode = 500;\n        return node.send([null, msg]);\n    }\n});\n\nconst sql = `\n    SELECT * FROM chats\n    WHERE flow_id = ?\n    GROUP BY session_id\n    ORDER BY date DESC\n`;\n\ndb.all(sql, [flow_id], (err, rows) => {\n    if (err) {\n        msg.payload = { error: \"Query failed: \" + err.message };\n        msg.statusCode = 500;\n        db.close();\n        return node.send([null, msg]);\n    }\n\n    const groupedData = {\n        today: [],\n        yesterday: [],\n        previous7Days: [],\n        previous30Days: []\n    };\n\n    const today = new Date().toISOString().split('T')[0];\n    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];\n\n    for (const row of rows) {\n        const { session_id, message, date } = row;\n        const dateStr = formatDate(date);\n\n        try {\n            const msgJson = JSON.parse(message);\n            if (\n                msgJson &&\n                msgJson.data &&\n                msgJson.data.content &&\n                msgJson.data.content !== \"None\"\n            ) {\n\n                const chatData = { session_id, title: msgJson.data.content };\n\n                if (dateStr === today) {\n                    groupedData.today.push(chatData);\n                } else if (dateStr === yesterday) {\n                    groupedData.yesterday.push(chatData);\n                } else if (isWithinDays(dateStr, 7)) {\n                    groupedData.previous7Days.push(chatData);\n                } else if (isWithinDays(dateStr, 30)) {\n                    groupedData.previous30Days.push(chatData);\n                }\n            }\n        } catch (e) {\n            node.warn(`Invalid JSON in message: ${e}`);\n        }\n    }\n\n    db.close();\n    msg.payload = groupedData;\n    node.send([msg, null]);\n});\n\n// Helpers\nfunction isWithinDays(dateString, days) {\n    const givenDate = new Date(dateString);\n    const now = new Date();\n    const diffTime = Math.abs(now - givenDate);\n    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) <= days;\n}\n\nfunction formatDate(date) {\n    if (date instanceof Date) {\n        return date.toISOString().split('T')[0];\n    }\n    return String(date).split(' ')[0];\n}\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 450,
+        "y": 1160,
+        "wires": [
+            [
+                "8ff74037.34b68"
+            ]
+        ]
+    },
+    {
+        "id": "83843d1.ebd9c4",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Prepare Stream",
+        "func": "var require = context.global.get('require'); \n\nconst res = {res: msg.res};\n\nmsg.res.setHeader('Content-Type', 'text/event-stream');\nmsg.res.setHeader('Connection', 'keep-alive');\nmsg.res.setHeader('Cache-Control', 'no-cache');\nmsg.res.setHeader('X-Accel-Buffering', 'no');\n\ncontext.global.set(msg._msgid+'res', res);\nvar newmsg = {};  // Define newmsg variable\nnewmsg.payload = msg.payload;\n\nreturn newmsg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 810,
+        "y": 260,
+        "wires": [
+            [
+                "f4c268e4.b1742"
+            ]
+        ]
+    },
+    {
+        "id": "b3ae6316.5b5638",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Set Data",
+        "func": "node.warn(msg.payload);\n\n// Retrieve the globally stored agent flow configuration\nlet globalConfig = context.global.get(\"AGENT_FLOW_CONFIG\");\n\nif (!globalConfig) {\n    node.error(\"Global config not found\");\n    return null;\n}\n\n// Extract the agent workflow from the global config\nlet agentWorkflow = globalConfig.agent_workflow || {};\n// let flow_id = globalConfig.flow_id;\nlet flow_id = msg.payload.flow_id;\nnode.warn(flow_id);\n\nlet thread_id = globalConfig.thread_id;\n\n// Get the searchText and sessionid from the incoming HTTP POST request payload\nlet searchText = msg.payload.searchText || msg.payload.human_text;\nlet sessionid = msg.payload.sessionid;\nlet user_id = msg.payload.user_id;\n\n// Ensure sessionid is provided, otherwise return an error\nif (!sessionid) {\n    node.error(\"Session ID is missing\");\n    return null;\n}\n\n// Construct the payload with updated question and other fields\nmsg.payload = {\n    question: searchText,\n    human_feedback: agentWorkflow.human_feedback || false,\n    thread_id: sessionid,\n    flow_id:flow_id,\n    user_id:user_id,\n    agent_workflow: {\n        agents: agentWorkflow.agents || {},\n        routes: agentWorkflow.routes || {},\n        memory: agentWorkflow.memory || { type: \"sqlite\" }\n    },\n    initial: false\n};\n\nnode.warn(msg.payload);\n\n// Return the modified payload\nreturn msg;\n\n// // Log incoming payload for debugging\n// node.warn(msg.payload);\n\n// // Retrieve the globally stored agent flow configuration\n// let globalConfig = context.global.get(\"AGENT_FLOW_CONFIG\");\n\n// if (!globalConfig) {\n//     node.error(\"Global config not found\");\n//     return null;\n// }\n\n// // Extract the agent workflow from the global config\n// let agentWorkflow = globalConfig.agent_workflow || {};\n// let flow_id = globalConfig.flow_id;\n// let thread_id = globalConfig.thread_id;\n// // Get the searchText from the incoming HTTP POST request payload\n// let searchText = msg.payload.searchText || msg.payload.human_text || \"Default question\";\n\n// // Construct the payload with updated question and other fields\n// msg.payload = {\n//     question: searchText,\n//     human_feedback: agentWorkflow.human_feedback || false,\n//     thread_id: thread_id || \"default_thread_1\",\n//     agent_workflow: {\n//         agents: agentWorkflow.agents || {},\n//         routes: agentWorkflow.routes || {},\n//         memory: agentWorkflow.memory || { type: \"sqlite\" }\n//     }\n// };\n// node.warn(msg.payload);\n\n// // Return the modified payload\n// return msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 280,
+        "y": 260,
+        "wires": [
+            [
+                "b213fb38.046948"
+            ]
+        ]
+    },
+    {
+        "id": "9a66b244.47381",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "AIAgent",
+        "url": "/research_agent_chat",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 260,
+        "wires": [
+            [
+                "b3ae6316.5b5638"
+            ]
+        ]
+    },
+    {
+        "id": "b213fb38.046948",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Check Workflow Ready",
+        "func": "const isReady = global.get(\"RESEARCH_AGENT_WORKFLOW_READY\");\nmsg.retries = msg.retries || 0;\n\nif (isReady) {\n    node.warn(\"Agent workflow is ready\");\n    return [msg, null];\n} else if (msg.retries >= 30) {\n    node.warn(\"Agent workflow is not ready, retry\");\n\n    msg.payload = { error: \"Timeout: Agent workflow not ready.\" };\n    return [null, msg];\n} else {\n    msg.retries += 1;\n    msg.delay = 15000;\n    return [null, msg];\n}",
+        "outputs": 2,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 510,
+        "y": 260,
+        "wires": [
+            [
+                "83843d1.ebd9c4"
+            ],
+            [
+                "84b34b5a.077928"
+            ]
+        ]
+    },
+    {
+        "id": "84b34b5a.077928",
+        "type": "delay",
+        "z": "8e3e3fa4.3f394",
+        "name": "Wait 15s",
+        "pauseType": "delayv",
+        "timeout": "15",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 500,
+        "y": 320,
+        "wires": [
+            [
+                "b213fb38.046948"
+            ]
+        ]
+    },
+    {
+        "id": "a9516d40.3a3ad",
+        "type": "AI-Agent-Arxiv-Tool",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-Arxiv-Tool",
+        "tool_node_name": "call_tool",
+        "web_search": "false",
+        "x": 1780,
+        "y": 200,
+        "wires": [
+            [
+                "951e24a.5e54058"
+            ]
+        ]
+    },
+    {
+        "id": "951e24a.5e54058",
+        "type": "AI-Agent-ChromaDb-Tool",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-ChromaDb-Tool",
+        "tool_node_name": "call_tool",
+        "web_search": "false",
+        "x": 2090,
+        "y": 200,
+        "wires": [
+            [
+                "3dd96a7a.e0d8ee"
+            ]
+        ]
+    },
+    {
+        "id": "c3466ac6.ca24f8",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "// Retrieve original HTTP response object from global\nconst resObj = context.global.get(msg._msgid + 'res');\n\nif (resObj && resObj.res) {\n    // Build HTTP success response\n    resObj.res.status(200).send({\n        status: \"success\",\n        message: \"AI Agent Workflow initialized successfully and ready!\"\n    });\n}\n\n// Stop flow after sending response\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1870,
+        "y": 600,
+        "wires": [
+            [
+                "86936a99.827af"
+            ]
+        ]
+    },
+    {
+        "id": "86936a99.827af",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 2070,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "7fd8d874.9c1ce8",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "Export File",
+        "url": "/api/export",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 780,
+        "wires": [
+            [
+                "aac433d6.1dab08"
+            ]
+        ]
+    },
+    {
+        "id": "53403d54.c4a5c4",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Export File",
+        "func": "var require = context.global.get('require'); \nvar fs = require('fs');\n\nasync function exportFile() {\n    if(msg.payload.file_path) {\n        fs.readFile(msg.payload.file_path, (err, data) => {\n            node.warn([err, data])\n            if (err) {\n                msg.res.status(500).send(\"Error reading file\");\n            } else {\n                msg.res.setHeader(\"Content-Type\", \"application/octet-stream\");\n                msg.res.setHeader(\"Content-Disposition\", \"attachment; filename=sample.txt\");\n                msg.res.send(data); \n            }\n        });\n    } else {\n        msg.res.status(500).send(\"Error reading file\");\n    }\n}\n\nexportFile();",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 1209,
+        "y": 780,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a0e06319.50406",
+        "type": "LLM-Document-Writer",
+        "z": "8e3e3fa4.3f394",
+        "name": "LLM-Document-Writer",
+        "max_length": "128",
+        "min_length": "8",
+        "top_p": "0.9",
+        "func": "\nreturn msg",
+        "outputs": 1,
+        "x": 769,
+        "y": 780,
+        "wires": [
+            [
+                "706941c2.0fb4c8"
+            ]
+        ]
+    },
+    {
+        "id": "30496588.a23afa",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "var require = context.global.get('require'); \n\nnode.warn(msg);\n\nconst res = {res: msg.res};\ncontext.global.set(msg._msgid+'res', res)\nvar newmsg = {};  // Define newmsg variable\nnewmsg.payload = msg.payload\n\n\nreturn newmsg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 529,
+        "y": 780,
+        "wires": [
+            [
+                "a0e06319.50406"
+            ]
+        ]
+    },
+    {
+        "id": "706941c2.0fb4c8",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "var require = context.global.get('require');\n\nmsg['res'] = context.global.get(msg._msgid + 'res').res;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1009,
+        "y": 780,
+        "wires": [
+            [
+                "53403d54.c4a5c4"
+            ]
+        ]
+    },
+    {
+        "id": "aac433d6.1dab08",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Set Payload",
+        "func": "let data = {\n    directory: '/interplay_v2/public/private/user_storage/',\n    filename: msg.payload.file_name,\n    file_type: `.${msg.payload.file_type}`,\n    content: msg.payload.content\n}\nnode.warn(data.content);\n\nmsg.payload = data;\n\nnode.send(msg);",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 310,
+        "y": 780,
+        "wires": [
+            [
+                "30496588.a23afa"
+            ]
+        ]
+    },
+    {
+        "id": "11d9fb97.d7effc",
+        "type": "AI-Agent-File-Summarization",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-Agent-File-Summarization",
+        "model_dir": "",
+        "outputs": 1,
+        "x": 980,
+        "y": 840,
+        "wires": [
+            [
+                "c4c07945.8519d"
+            ]
+        ]
+    },
+    {
+        "id": "6594cbbd.ad281c",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "var require = context.global.get('require'); \n\n\nconst res = {res: msg.res};\n\nmsg.res.setHeader('Content-Type', 'text/event-stream');\nmsg.res.setHeader('Connection', 'keep-alive');\nmsg.res.setHeader('Cache-Control', 'no-cache');\nmsg.res.setHeader('X-Accel-Buffering', 'no');\n\ncontext.global.set(msg._msgid+'res', res)\nvar newmsg = {};  // Define newmsg variable\nnewmsg.payload = msg.payload\n\n\nreturn newmsg;",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 366,
+        "y": 838,
+        "wires": [
+            [
+                "da82f23b.8a858"
+            ]
+        ]
+    },
+    {
+        "id": "3f06cf0.76dd832",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "AI-File-Summarize",
+        "url": "/research_agent_file_summarize",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 840,
+        "wires": [
+            [
+                "6594cbbd.ad281c"
+            ]
+        ]
+    },
+    {
+        "id": "c4c07945.8519d",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "func": "var require = context.global.get('require');\nmsg.res = context.global.get(msg._msgid + 'res').res;\n\n// 🔹 Get existing buffer or init new one\nvar buffer = context.global.get(msg._msgid + '_sse_buffer') || \"\";\n\n// If not final response, stream partials\nif (!msg.payload.finalResponse) {\n    buffer += msg.payload.mssg || \"\";\n\n    // Flush only when buffer ends with whitespace or punctuation\n    if (/[ \\n.,!?]/.test(buffer.slice(-1))) {\n        msg.res.write(`data: ${buffer}\\n\\n`);\n        buffer = \"\"; // reset after flush\n    }\n\n    // Save buffer state for next chunk\n    context.global.set(msg._msgid + '_sse_buffer', buffer);\n\n    if (typeof msg.res.flush === 'function') {\n        msg.res.flush();\n    }\n    return null; // stop here for partials\n}\n\n// 🔹 Final response\n// Flush remaining buffer if any\nif (buffer.length > 0) {\n    msg.res.write(`data: ${buffer}\\n\\n`);\n    buffer = \"\";\n}\ncontext.global.set(msg._msgid + '_sse_buffer', buffer);\n\n// Send end event\nmsg.res.write('event: end\\ndata: [DONE]\\n\\n');\nmsg.res.end();\n\nreturn null;\n// var require = context.global.get('require');\n\n// msg.res = context.global.get(msg._msgid + 'res').res;\n\n// // If not final response, stream and return\n// if (!msg.payload.finalResponse) {\n//     msg.res.write(`data: ${msg.payload.mssg || ''}\\n\\n`);\n//     if (typeof msg.res.flush === 'function') {\n//         msg.res.flush();\n//     }\n//     return null; // stop here for partials\n// }\n\n// // Final message — end SSE\n// msg.res.write('event: end\\ndata: [DONE]\\n\\n');\n// msg.res.end();\n// return null;\n",
+        "outputs": 1,
+        "timeout": 10000,
+        "newThread": false,
+        "noerr": 0,
+        "x": 1290,
+        "y": 840,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "da82f23b.8a858",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Check Workflow Ready",
+        "func": "const isReady = global.get(\"RESEARCH_AGENT_WORKFLOW_READY\");\nmsg.retries = msg.retries || 0;\n\nif (isReady) {\n    node.warn(\"Agent workflow is ready\");\n    return [msg, null];\n} else if (msg.retries >= 30) {\n    node.warn(\"Agent workflow is not ready, retry\");\n\n    msg.payload = { error: \"Timeout: Agent workflow not ready.\" };\n    return [null, msg];\n} else {\n    msg.retries += 1;\n    msg.delay = 15000;\n    return [null, msg];\n}",
+        "outputs": 2,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 630,
+        "y": 840,
+        "wires": [
+            [
+                "11d9fb97.d7effc"
+            ],
+            [
+                "be3de941.409c68"
+            ]
+        ]
+    },
+    {
+        "id": "be3de941.409c68",
+        "type": "delay",
+        "z": "8e3e3fa4.3f394",
+        "name": "Wait 15s",
+        "pauseType": "delayv",
+        "timeout": "15",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 620,
+        "y": 900,
+        "wires": [
+            [
+                "da82f23b.8a858"
+            ]
+        ]
+    },
+    {
+        "id": "8dc3bfd3.6b69f",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "Load UI",
+        "url": "/research-agent/",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 1260,
+        "wires": [
+            [
+                "1ae04328.449f4d"
+            ]
+        ]
+    },
+    {
+        "id": "1ae04328.449f4d",
+        "type": "template",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>AI Research Assistant</title>\n    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\">\n    <style>\n        /* CSS Variables for Theme System */\n        :root {\n            /* Light Theme */\n            --bg-primary: #ffffff;\n            --bg-secondary: #f8f9fa;\n            --bg-tertiary: #e9ecef;\n            --bg-hover: #dee2e6;\n            --text-primary: #212529;\n            --text-secondary: #495057;\n            --text-tertiary: #6c757d;\n            --accent-primary: #4a90e2;\n            --accent-secondary: #357abd;\n            --accent-hover: #2868a8;\n            --border-color: #dee2e6;\n            --shadow-sm: rgba(0, 0, 0, 0.05);\n            --shadow-md: rgba(0, 0, 0, 0.1);\n            --shadow-lg: rgba(0, 0, 0, 0.15);\n            --success: #28a745;\n            --warning: #ffc107;\n            --error: #dc3545;\n            --info: #17a2b8;\n        }\n\n        [data-theme=\"dark\"] {\n            /* Dark Theme - Galaxy Neutron (No Gradients) */\n            --bg-primary: #0a0e27;\n            --bg-secondary: #1a1f3a;\n            --bg-tertiary: #2d3561;\n            --bg-hover: #3d4785;\n            --text-primary: #e8eaf0;\n            --text-secondary: #b8bcc8;\n            --text-tertiary: #8a8f9e;\n            --accent-primary: #5b6fb5;\n            --accent-secondary: #7c8fd9;\n            --accent-hover: #9daae6;\n            --border-color: #3d4785;\n            --shadow-sm: rgba(0, 0, 0, 0.3);\n            --shadow-md: rgba(0, 0, 0, 0.4);\n            --shadow-lg: rgba(0, 0, 0, 0.5);\n            --success: #4caf50;\n            --warning: #ff9800;\n            --error: #f44336;\n            --info: #2196f3;\n        }\n\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n            background-color: var(--bg-primary);\n            color: var(--text-primary);\n            line-height: 1.6;\n            transition: background-color 0.3s, color 0.3s;\n        }\n\n        /* Header */\n        .header {\n            background-color: var(--bg-secondary);\n            padding: 1rem 2rem;\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n            box-shadow: 0 2px 8px var(--shadow-sm);\n        }\n\n        .logo {\n            display: flex;\n            align-items: center;\n            gap: 0.75rem;\n        }\n\n        .logo-icon {\n            width: 40px;\n            height: 40px;\n            background-color: var(--accent-primary);\n            border-radius: 10px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            color: white;\n            font-weight: bold;\n            font-size: 1.25rem;\n        }\n\n        .logo-text h1 {\n            font-size: 1.5rem;\n            font-weight: 700;\n            color: var(--text-primary);\n        }\n\n        .logo-text p {\n            font-size: 0.75rem;\n            color: var(--text-tertiary);\n        }\n\n        .header-actions {\n            display: flex;\n            align-items: center;\n            gap: 0.5rem;\n        }\n\n        .header-nav {\n            background-color: var(--bg-tertiary);\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 8px;\n            cursor: pointer;\n            color: var(--text-primary);\n            font-size: 0.9rem;\n            transition: background-color 0.2s;\n            display: flex;\n            align-items: center;\n            gap: 0.5rem;\n        }\n\n        .header-nav:hover {\n            background-color: var(--bg-hover);\n        }\n\n        .header-nav.active {\n            background-color: var(--accent-primary);\n            color: white;\n        }\n\n        .theme-toggle {\n            background-color: var(--bg-tertiary);\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 8px;\n            cursor: pointer;\n            color: var(--text-primary);\n            font-size: 0.9rem;\n            transition: background-color 0.2s;\n        }\n\n        .theme-toggle:hover {\n            background-color: var(--bg-hover);\n        }\n\n        /* Container */\n        .container {\n            display: flex;\n            height: calc(100vh - 80px);\n            overflow: hidden;\n        }\n\n        /* Sidebar */\n        .sidebar {\n            width: 280px;\n            background-color: var(--bg-secondary);\n            padding: 1.5rem;\n            overflow: hidden;\n            box-shadow: 2px 0 8px var(--shadow-sm);\n            display: flex;\n            flex-direction: column;\n        }\n\n        .nav-section {\n            overflow: hidden;\n            display: flex;\n            flex-direction: column;\n            margin-bottom: 1.5rem;\n        }\n\n        .nav-section:last-of-type {\n            flex: 1;\n        }\n\n        .nav-section h3 {\n            font-size: 0.75rem;\n            text-transform: uppercase;\n            color: var(--text-tertiary);\n            margin-bottom: 0.75rem;\n            font-weight: 600;\n            letter-spacing: 0.5px;\n            display: flex;\n            align-items: center;\n            justify-content: space-between;\n            cursor: pointer;\n            padding: 0.5rem 0;\n            user-select: none;\n            flex-shrink: 0;\n        }\n\n        .nav-section h3:hover {\n            color: var(--text-primary);\n        }\n\n        .history-category {\n            margin-bottom: 1rem;\n        }\n\n        .history-category h4 {\n            font-size: 0.7rem;\n            text-transform: uppercase;\n            color: var(--text-tertiary);\n            margin: 0 0 0.5rem;\n            font-weight: 600;\n            display: flex;\n            align-items: center;\n            justify-content: space-between;\n            cursor: pointer;\n            padding: 0.25rem 0;\n            user-select: none;\n        }\n\n        .history-category h4:hover {\n            color: var(--text-primary);\n        }\n\n        .collapse-icon {\n            font-size: 0.9rem;\n            transition: transform 0.2s;\n            display: inline-block;\n        }\n\n        .history-category-content {\n            max-height: 1000px;\n            overflow-y: auto;\n            overflow-x: hidden;\n            transition: max-height 0.3s ease-out;\n            display: flex;\n            flex-direction: column;\n            gap: 0.5rem;\n            padding-right: 0.5rem;\n        }\n\n        .history-category-content.collapsed {\n            max-height: 0;\n            overflow: hidden;\n        }\n\n        .collapsible-content {\n            max-height: 500px;\n            overflow-y: auto;\n            overflow-x: hidden;\n            transition: max-height 0.3s ease-out;\n            padding-right: 0.5rem;\n        }\n\n        .collapsible-content.collapsed {\n            max-height: 0;\n            overflow: hidden;\n        }\n\n        .history-item {\n            padding: 0.5rem 0.75rem;\n            background-color: var(--bg-tertiary);\n            border-radius: 8px;\n            cursor: pointer;\n            transition: background-color 0.2s;\n        }\n\n        .history-item:hover {\n            background-color: var(--bg-hover);\n        }\n\n        .history-item.active {\n            background-color: var(--accent-primary);\n            color: white;\n        }\n\n        .history-title {\n            font-size: 0.85rem;\n            font-weight: 500;\n            white-space: nowrap;\n            overflow: hidden;\n            text-overflow: ellipsis;\n        }\n\n        .papers-list {\n            display: flex;\n            flex-direction: column;\n            gap: 0.5rem;\n        }\n\n        .nav-item {\n            padding: 0.75rem 1rem;\n            margin-bottom: 0.5rem;\n            border-radius: 8px;\n            cursor: pointer;\n            color: var(--text-secondary);\n            transition: all 0.2s;\n            display: flex;\n            align-items: center;\n            gap: 0.75rem;\n        }\n\n        .nav-item:hover {\n            background-color: var(--bg-tertiary);\n            color: var(--text-primary);\n        }\n\n        .nav-item.active {\n            background-color: var(--accent-primary);\n            color: white;\n        }\n\n        .nav-icon {\n            font-size: 1.1rem;\n        }\n\n        .new-chat-btn {\n            width: 100%;\n            padding: 0.75rem;\n            background-color: var(--accent-primary);\n            color: white;\n            border: none;\n            border-radius: 8px;\n            cursor: pointer;\n            font-weight: 500;\n            margin-bottom: 1rem;\n            transition: background-color 0.2s;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            gap: 0.5rem;\n        }\n\n        .new-chat-btn:hover {\n            background-color: var(--accent-secondary);\n        }\n\n        /* Follow-up Toggle */\n        .follow-up-toggle {\n            display: flex;\n            align-items: center;\n            gap: 0.5rem;\n        }\n\n        .toggle-switch {\n            position: relative;\n            width: 40px;\n            height: 20px;\n            background-color: var(--bg-hover);\n            border-radius: 10px;\n            cursor: pointer;\n            transition: background-color 0.3s;\n        }\n\n        .toggle-switch.active {\n            background-color: var(--accent-primary);\n        }\n\n        .toggle-slider {\n            position: absolute;\n            top: 2px;\n            left: 2px;\n            width: 16px;\n            height: 16px;\n            background-color: white;\n            border-radius: 50%;\n            transition: transform 0.3s;\n        }\n\n        .toggle-switch.active .toggle-slider {\n            transform: translateX(20px);\n        }\n\n        /* Main Content */\n        .main-content {\n            flex: 1;\n            padding: 2rem;\n            overflow-y: auto;\n            background-color: var(--bg-primary);\n        }\n\n        /* Card */\n        .card {\n            background-color: var(--bg-secondary);\n            border-radius: 12px;\n            padding: 1.5rem;\n            margin-bottom: 1.5rem;\n            box-shadow: 0 2px 8px var(--shadow-sm);\n        }\n\n        .card-header {\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n            margin-bottom: 1.5rem;\n            padding-bottom: 1rem;\n        }\n\n        .card-title {\n            font-size: 1.25rem;\n            font-weight: 600;\n            color: var(--text-primary);\n            display: flex;\n            align-items: center;\n            gap: 0.5rem;\n        }\n\n        /* Button */\n        .btn {\n            padding: 0.625rem 1.25rem;\n            border: none;\n            border-radius: 8px;\n            cursor: pointer;\n            font-size: 0.9rem;\n            font-weight: 500;\n            transition: all 0.2s;\n            display: inline-flex;\n            align-items: center;\n            gap: 0.5rem;\n        }\n\n        .btn-primary {\n            background-color: var(--accent-primary);\n            color: white;\n        }\n\n        .btn-primary:hover {\n            background-color: var(--accent-secondary);\n        }\n\n        .btn-secondary {\n            background-color: var(--bg-tertiary);\n            color: var(--text-primary);\n        }\n\n        .btn-secondary:hover {\n            background-color: var(--bg-hover);\n        }\n\n        .btn:disabled {\n            opacity: 0.5;\n            cursor: not-allowed;\n        }\n\n        /* Input */\n        .input {\n            width: 100%;\n            padding: 0.875rem 1rem;\n            border: none;\n            border-radius: 10px;\n            background-color: var(--bg-tertiary);\n            color: var(--text-primary);\n            font-size: 0.9rem;\n            transition: all 0.2s;\n        }\n\n        .input:focus {\n            outline: none;\n            background-color: var(--bg-hover);\n            box-shadow: 0 0 0 3px rgba(91, 111, 181, 0.15);\n        }\n\n        .input::placeholder {\n            color: var(--text-tertiary);\n        }\n\n        textarea.input {\n            resize: vertical;\n            min-height: 100px;\n            font-family: inherit;\n        }\n\n        select.input {\n            cursor: pointer;\n        }\n\n        /* Form Group */\n        .form-group {\n            margin-bottom: 1.5rem;\n        }\n\n        .form-label {\n            display: block;\n            margin-bottom: 0.5rem;\n            font-weight: 600;\n            color: var(--text-primary);\n            font-size: 0.9rem;\n        }\n\n        .form-hint {\n            font-size: 0.8rem;\n            color: var(--text-tertiary);\n            margin-top: 0.25rem;\n        }\n\n        /* Chat Interface */\n        .chat-container {\n            display: flex;\n            flex-direction: column;\n            height: calc(100vh - 180px);\n            background-color: var(--bg-secondary);\n            border-radius: 12px;\n            overflow: hidden;\n        }\n\n        .chat-header {\n            padding: 1rem 1.5rem;\n            background-color: var(--bg-tertiary);\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n        }\n\n        .chat-status {\n            display: flex;\n            align-items: center;\n            gap: 0.5rem;\n            font-size: 0.85rem;\n            color: var(--text-secondary);\n        }\n\n        .status-dot {\n            width: 8px;\n            height: 8px;\n            border-radius: 50%;\n            background-color: var(--success);\n            animation: pulse 2s infinite;\n        }\n\n        @keyframes pulse {\n            0%, 100% { opacity: 1; }\n            50% { opacity: 0.5; }\n        }\n\n        .chat-messages {\n            flex: 1;\n            overflow-y: auto;\n            padding: 1.5rem;\n            display: flex;\n            flex-direction: column;\n            gap: 1rem;\n        }\n\n        .chat-message {\n            display: flex;\n            gap: 0.75rem;\n            max-width: 80%;\n        }\n\n        .chat-message.user {\n            align-self: flex-end;\n            flex-direction: row-reverse;\n        }\n\n        .message-avatar {\n            display: none;\n        }\n\n        .message-content {\n            background-color: var(--bg-tertiary);\n            padding: 0.5rem 0.75rem;\n            border-radius: 12px;\n            color: var(--text-primary);\n            word-wrap: break-word;\n        }\n\n        .chat-message.user .message-content {\n            background-color: var(--bg-tertiary);\n            color: var(--text-primary);\n        }\n\n        .message-time {\n            font-size: 0.7rem;\n            color: var(--text-tertiary);\n            margin-top: 0.25rem;\n        }\n\n        .chat-input-container {\n            padding: 1rem 1.5rem;\n            background-color: var(--bg-tertiary);\n            display: flex;\n            gap: 0.75rem;\n            align-items: flex-end;\n        }\n\n        .chat-input {\n            flex: 1;\n            padding: 0.75rem;\n            border: 2px solid var(--bg-hover);\n            border-radius: 8px;\n            background-color: var(--bg-primary);\n            color: var(--text-primary);\n            resize: none;\n            max-height: 120px;\n            font-family: inherit;\n        }\n\n        .chat-input:focus {\n            outline: none;\n            border-color: var(--accent-primary);\n        }\n\n        .send-btn {\n            padding: 0.75rem 1.25rem;\n            background-color: var(--accent-primary);\n            color: white;\n            border: none;\n            border-radius: 8px;\n            cursor: pointer;\n            transition: background-color 0.2s;\n        }\n\n        .send-btn:hover:not(:disabled) {\n            background-color: var(--accent-secondary);\n        }\n\n        .send-btn:disabled {\n            opacity: 0.5;\n            cursor: not-allowed;\n        }\n\n        /* Papers List */\n        .papers-list {\n            display: flex;\n            flex-direction: column;\n            gap: 0.5rem;\n        }\n\n        .paper-item {\n            padding: 0.5rem 0.75rem;\n            background-color: var(--bg-tertiary);\n            border-radius: 8px;\n            cursor: pointer;\n            transition: background-color 0.2s;\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n        }\n\n        .paper-item:hover {\n            background-color: var(--bg-hover);\n        }\n\n        .paper-info {\n            flex: 1;\n            min-width: 0;\n        }\n\n        .paper-title {\n            font-weight: 500;\n            color: var(--text-primary);\n            font-size: 0.85rem;\n            white-space: nowrap;\n            overflow: hidden;\n            text-overflow: ellipsis;\n        }\n\n        .paper-meta {\n            display: none;\n        }\n\n        .paper-actions {\n            display: flex;\n            gap: 0.5rem;\n        }\n\n        .icon-btn {\n            padding: 0.5rem;\n            background-color: var(--bg-secondary);\n            border: none;\n            border-radius: 6px;\n            cursor: pointer;\n            color: var(--text-secondary);\n            transition: all 0.2s;\n        }\n\n        .icon-btn:hover {\n            background-color: var(--accent-primary);\n            color: white;\n        }\n\n        /* Upload Zone */\n        .upload-zone {\n            border-radius: 16px;\n            padding: 3rem 2rem;\n            text-align: center;\n            cursor: pointer;\n            transition: all 0.3s;\n            background-color: var(--bg-tertiary);\n            position: relative;\n            overflow: hidden;\n        }\n\n        .upload-zone::before {\n            content: '';\n            position: absolute;\n            inset: 0;\n            border-radius: 16px;\n            padding: 2px;\n            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));\n            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);\n            -webkit-mask-composite: xor;\n            mask-composite: exclude;\n            opacity: 0.3;\n        }\n\n        .upload-zone:hover {\n            background-color: var(--bg-hover);\n            transform: translateY(-2px);\n        }\n\n        .upload-zone:hover::before {\n            opacity: 0.6;\n        }\n\n        .upload-zone.dragover {\n            background-color: var(--accent-primary);\n            opacity: 0.3;\n        }\n\n        .upload-icon {\n            font-size: 3rem;\n            color: var(--text-tertiary);\n            margin-bottom: 1rem;\n        }\n\n        .upload-text {\n            color: var(--text-secondary);\n            margin-bottom: 0.5rem;\n        }\n\n        .upload-hint {\n            font-size: 0.85rem;\n            color: var(--text-tertiary);\n        }\n\n        /* Modal */\n        .modal {\n            display: none;\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background-color: rgba(0, 0, 0, 0.7);\n            z-index: 1000;\n            align-items: center;\n            justify-content: center;\n        }\n\n        .modal.active {\n            display: flex;\n        }\n\n        .modal-content {\n            background-color: var(--bg-secondary);\n            border-radius: 12px;\n            width: 90%;\n            max-width: 900px;\n            max-height: 90vh;\n            overflow: hidden;\n            display: flex;\n            flex-direction: column;\n        }\n\n        .modal-header {\n            padding: 1.5rem;\n            background-color: var(--bg-tertiary);\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n        }\n\n        .modal-title {\n            font-size: 1.25rem;\n            font-weight: 600;\n            color: var(--text-primary);\n        }\n\n        .modal-close {\n            background: none;\n            border: none;\n            font-size: 1.5rem;\n            cursor: pointer;\n            color: var(--text-secondary);\n            padding: 0.25rem 0.5rem;\n        }\n\n        .modal-close:hover {\n            color: var(--text-primary);\n        }\n\n        .modal-body {\n            padding: 1.5rem;\n            overflow-y: auto;\n            flex: 1;\n        }\n\n        /* Toast */\n        .toast-container {\n            position: fixed;\n            top: 1rem;\n            right: 1rem;\n            z-index: 2000;\n            display: flex;\n            flex-direction: column;\n            gap: 0.5rem;\n        }\n\n        .toast {\n            padding: 1rem 1.5rem;\n            border-radius: 8px;\n            color: white;\n            display: flex;\n            align-items: center;\n            gap: 0.75rem;\n            min-width: 300px;\n            animation: slideIn 0.3s ease-out;\n        }\n\n        @keyframes slideIn {\n            from {\n                transform: translateX(400px);\n                opacity: 0;\n            }\n            to {\n                transform: translateX(0);\n                opacity: 1;\n            }\n        }\n\n        .toast.success {\n            background-color: var(--success);\n        }\n\n        .toast.error {\n            background-color: var(--error);\n        }\n\n        .toast.warning {\n            background-color: var(--warning);\n        }\n\n        .toast.info {\n            background-color: var(--info);\n        }\n\n        /* Loading */\n        .loading {\n            display: inline-flex;\n            gap: 0.25rem;\n        }\n\n        .loading-dot {\n            width: 8px;\n            height: 8px;\n            border-radius: 50%;\n            background-color: currentColor;\n            animation: bounce 1.4s infinite ease-in-out both;\n        }\n\n        .loading-dot:nth-child(1) {\n            animation-delay: -0.32s;\n        }\n\n        .loading-dot:nth-child(2) {\n            animation-delay: -0.16s;\n        }\n\n        @keyframes bounce {\n            0%, 80%, 100% {\n                transform: scale(0);\n            }\n            40% {\n                transform: scale(1);\n            }\n        }\n\n        /* Utility Classes */\n        .hidden {\n            display: none !important;\n        }\n\n        .text-center {\n            text-align: center;\n        }\n\n        .mt-1 { margin-top: 0.5rem; }\n        .mt-2 { margin-top: 1rem; }\n        .mb-1 { margin-bottom: 0.5rem; }\n        .mb-2 { margin-bottom: 1rem; }\n\n        /* Scrollbar */\n        ::-webkit-scrollbar {\n            width: 8px;\n            height: 8px;\n        }\n\n        ::-webkit-scrollbar-track {\n            background: var(--bg-secondary);\n        }\n\n        ::-webkit-scrollbar-thumb {\n            background: var(--bg-hover);\n            border-radius: 4px;\n        }\n\n        ::-webkit-scrollbar-thumb:hover {\n            background: var(--text-tertiary);\n        }\n\n        /* Responsive */\n        @media (max-width: 768px) {\n            .sidebar {\n                width: 200px;\n            }\n\n            .container {\n                flex-direction: column;\n            }\n\n            .main-content {\n                padding: 1rem;\n            }\n\n            .chat-message {\n                max-width: 90%;\n            }\n        }\n\n        /* Empty State */\n        .empty-state {\n            text-align: center;\n            padding: 3rem 1rem;\n            color: var(--text-tertiary);\n        }\n\n        .empty-icon {\n            font-size: 3rem;\n            margin-bottom: 1rem;\n            opacity: 0.5;\n        }\n\n        /* Range Slider */\n        .range-slider {\n            width: 100%;\n            height: 6px;\n            border-radius: 3px;\n            background: var(--bg-tertiary);\n            outline: none;\n            -webkit-appearance: none;\n        }\n\n        .range-slider::-webkit-slider-thumb {\n            -webkit-appearance: none;\n            appearance: none;\n            width: 18px;\n            height: 18px;\n            border-radius: 50%;\n            background: var(--accent-primary);\n            cursor: pointer;\n        }\n\n        .range-slider::-moz-range-thumb {\n            width: 18px;\n            height: 18px;\n            border-radius: 50%;\n            background: var(--accent-primary);\n            cursor: pointer;\n            border: none;\n        }\n\n        .range-labels {\n            display: flex;\n            justify-content: space-between;\n            font-size: 0.75rem;\n            color: var(--text-tertiary);\n            margin-top: 0.5rem;\n        }\n\n        /* File selected indicator */\n        .file-selected {\n            padding: 1rem;\n            background-color: var(--bg-tertiary);\n            border-radius: 8px;\n            margin-top: 1rem;\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n        }\n\n        .file-name {\n            color: var(--text-primary);\n            font-weight: 500;\n        }\n\n        .remove-file {\n            background: none;\n            border: none;\n            color: var(--error);\n            cursor: pointer;\n            font-size: 1.2rem;\n        }\n\n        /* Initialization Loading Screen */\n        .init-overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background-color: var(--bg-primary);\n            z-index: 9999;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            transition: opacity 0.5s ease-out;\n        }\n\n        .init-overlay.hidden {\n            opacity: 0;\n            pointer-events: none;\n        }\n\n        .init-content {\n            text-align: center;\n            padding: 2rem;\n        }\n\n        .init-logo {\n            width: 80px;\n            height: 80px;\n            background-color: var(--accent-primary);\n            border-radius: 20px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            margin: 0 auto 2rem;\n            font-size: 2.5rem;\n            color: white;\n            font-weight: bold;\n            animation: pulse-logo 2s ease-in-out infinite;\n        }\n\n        @keyframes pulse-logo {\n            0%, 100% {\n                transform: scale(1);\n                box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.7);\n            }\n            50% {\n                transform: scale(1.05);\n                box-shadow: 0 0 0 20px rgba(74, 144, 226, 0);\n            }\n        }\n\n        .init-title {\n            font-size: 1.75rem;\n            font-weight: 700;\n            color: var(--text-primary);\n            margin-bottom: 0.5rem;\n        }\n\n        .init-subtitle {\n            font-size: 1rem;\n            color: var(--text-secondary);\n            margin-bottom: 2rem;\n        }\n\n        .init-spinner {\n            display: inline-flex;\n            gap: 0.5rem;\n            margin-top: 1rem;\n        }\n\n        .init-dot {\n            width: 12px;\n            height: 12px;\n            border-radius: 50%;\n            background-color: var(--accent-primary);\n            animation: bounce-init 1.4s infinite ease-in-out both;\n        }\n\n        .init-dot:nth-child(1) {\n            animation-delay: -0.32s;\n        }\n\n        .init-dot:nth-child(2) {\n            animation-delay: -0.16s;\n        }\n\n        @keyframes bounce-init {\n            0%, 80%, 100% {\n                transform: scale(0);\n                opacity: 0.5;\n            }\n            40% {\n                transform: scale(1);\n                opacity: 1;\n            }\n        }\n\n        .init-message {\n            font-size: 0.9rem;\n            color: var(--text-tertiary);\n            margin-top: 1rem;\n        }\n    </style>\n</head>\n<body>\n    <!-- Initialization Loading Screen -->\n    <div class=\"init-overlay\" id=\"initOverlay\">\n        <div class=\"init-content\">\n            <div class=\"init-logo\">AI</div>\n            <h1 class=\"init-title\">AI Research Assistant</h1>\n            <p class=\"init-subtitle\">Intelligent Paper Analysis</p>\n            <div class=\"init-spinner\">\n                <div class=\"init-dot\"></div>\n                <div class=\"init-dot\"></div>\n                <div class=\"init-dot\"></div>\n            </div>\n            <p class=\"init-message\">Initializing AI agent...</p>\n        </div>\n    </div>\n\n    <!-- Header -->\n    <header class=\"header\">\n        <div class=\"logo\">\n            <div class=\"logo-icon\">AI</div>\n            <div class=\"logo-text\">\n                <h1>AI Research Assistant</h1>\n                <p>Intelligent Paper Analysis</p>\n            </div>\n        </div>\n        <div class=\"header-actions\">\n            <button class=\"header-nav active\" data-page=\"chat\">\n                <span>💬</span> <span>Chat</span>\n            </button>\n            <button class=\"header-nav\" data-page=\"upload\">\n                <span>📤</span> <span>Upload</span>\n            </button>\n            <button class=\"header-nav\" data-page=\"instructions\">\n                <span>📝</span> <span>Instructions</span>\n            </button>\n            <button class=\"header-nav\" data-page=\"config\">\n                <span>⚙️</span> <span>Config</span>\n            </button>\n            <button class=\"theme-toggle\" id=\"themeToggle\">\n                <span id=\"themeIcon\">🌙</span> <span id=\"themeText\">Dark</span>\n            </button>\n        </div>\n    </header>\n\n    <!-- Main Container -->\n    <div class=\"container\">\n        <!-- Sidebar -->\n        <aside class=\"sidebar\">\n            <!-- New Chat Button (Static) -->\n            <button class=\"new-chat-btn\" id=\"newChatBtn\">\n                ✨ New Chat\n            </button>\n\n            <div class=\"nav-section\" id=\"papersSidebar\">\n                <h3 onclick=\"toggleSection('papers')\">\n                    <span>Documents</span>\n                    <i class=\"fa-solid fa-chevron-down collapse-icon\" id=\"papersIcon\"></i>\n                </h3>\n                <div id=\"papersList\" class=\"papers-list collapsible-content collapsed\">\n                    <div class=\"empty-state\">\n                        <div class=\"empty-icon\">📄</div>\n                        <p>No documents uploaded</p>\n                    </div>\n                </div>\n            </div>\n\n            <div class=\"nav-section\" id=\"historySidebar\">\n                <h3 onclick=\"toggleSection('history')\">\n                    <span>Chat History</span>\n                    <i class=\"fa-solid fa-chevron-down collapse-icon\" id=\"historyIcon\"></i>\n                </h3>\n                <div id=\"historyList\" class=\"papers-list collapsible-content collapsed\">\n                    <div class=\"empty-state\">\n                        <div class=\"empty-icon\">📝</div>\n                        <p>No chat history</p>\n                    </div>\n                </div>\n            </div>\n        </aside>\n\n        <!-- Main Content -->\n        <main class=\"main-content\">\n            <!-- Chat Page -->\n            <div id=\"chatPage\" class=\"page-content\">\n                <div class=\"chat-container\">\n                    <div class=\"chat-header\">\n                        <div>\n                            <h3 style=\"color: var(--text-primary); margin-bottom: 0.25rem;\">AI Assistant</h3>\n                            <div class=\"chat-status\">\n                                <span class=\"status-dot\"></span>\n                                <span>Ready to help</span>\n                            </div>\n                        </div>\n                        <div class=\"follow-up-toggle\">\n                            <span style=\"font-size: 0.85rem; color: var(--text-secondary);\">Follow-up</span>\n                            <div class=\"toggle-switch active\" id=\"followUpToggle\">\n                                <div class=\"toggle-slider\"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"chat-messages\" id=\"chatMessages\">\n                        <div class=\"empty-state\">\n                            <div class=\"empty-icon\">💬</div>\n                            <h3 style=\"color: var(--text-primary); margin-bottom: 0.5rem;\">Welcome to AI Research Assistant</h3>\n                            <p>Upload your research papers and start asking questions.</p>\n                        </div>\n                    </div>\n                    <div class=\"chat-input-container\">\n                        <textarea \n                            class=\"chat-input\" \n                            id=\"chatInput\" \n                            placeholder=\"Ask me about your research papers...\"\n                            rows=\"1\"\n                        ></textarea>\n                        <button class=\"send-btn\" id=\"sendBtn\">\n                            <span>Send</span>\n                        </button>\n                    </div>\n                </div>\n            </div>\n\n            <!-- Upload Page -->\n            <div id=\"uploadPage\" class=\"page-content hidden\">\n                <div class=\"card\">\n                    <div class=\"card-header\">\n                        <h2 class=\"card-title\">\n                            <span>📤</span>\n                            Upload Research Paper\n                        </h2>\n                    </div>\n                    <div>\n                        <div class=\"upload-zone\" id=\"uploadZone\">\n                            <div class=\"upload-icon\">📄</div>\n                            <div class=\"upload-text\">Drag and drop your PDF or TXT file here</div>\n                            <div class=\"upload-hint\">or click to browse</div>\n                            <input type=\"file\" id=\"fileInput\" accept=\".pdf,.txt\" style=\"display: none;\">\n                        </div>\n                        <div id=\"fileSelected\" class=\"file-selected hidden\">\n                            <span class=\"file-name\" id=\"fileName\"></span>\n                            <button class=\"remove-file\" id=\"removeFile\">×</button>\n                        </div>\n                        <button class=\"btn btn-primary mt-2\" id=\"uploadBtn\" style=\"width: 100%;\" disabled>\n                            <span>📤</span>\n                            <span>Upload Paper</span>\n                        </button>\n                    </div>\n                </div>\n            </div>\n\n            <!-- Instructions Page -->\n            <div id=\"instructionsPage\" class=\"page-content hidden\">\n                <div class=\"card\">\n                    <div class=\"card-header\">\n                        <h2 class=\"card-title\">\n                            <span>📝</span>\n                            AI Instructions\n                        </h2>\n                    </div>\n                    <div>\n                        <div class=\"form-group\">\n                            <label class=\"form-label\">Current System Instructions</label>\n                            <textarea class=\"input\" id=\"currentInstructions\" readonly rows=\"4\"></textarea>\n                        </div>\n                        <div class=\"form-group\">\n                            <label class=\"form-label\">Additional Custom Instructions</label>\n                            <textarea class=\"input\" id=\"customInstructions\" placeholder=\"Enter your custom instructions here...\" rows=\"6\"></textarea>\n                            <div class=\"form-hint\">Your instructions will be appended to the base system message</div>\n                        </div>\n                        <div style=\"display: flex; gap: 1rem;\">\n                            <button class=\"btn btn-secondary\" id=\"cancelInstructions\">Cancel</button>\n                            <button class=\"btn btn-primary\" id=\"updateInstructions\">\n                                <span>✓</span>\n                                <span>Update Instructions</span>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <!-- Config Page -->\n            <div id=\"configPage\" class=\"page-content hidden\">\n                <div class=\"card\">\n                    <div class=\"card-header\">\n                        <h2 class=\"card-title\">\n                            <span>⚙️</span>\n                            LLM Configuration\n                        </h2>\n                    </div>\n                    <div>\n                        <div class=\"form-group\">\n                            <label class=\"form-label\">Model Provider</label>\n                            <select class=\"input\" id=\"modelType\">\n                                <option value=\"openai\">OpenAI</option>\n                                <option value=\"openai_style_gaudi\">OpenAI Style (Gaudi)</option>\n                                <option value=\"openai_style_amd\">OpenAI Style (AMD)</option>\n                            </select>\n                        </div>\n                        <div class=\"form-group\">\n                            <label class=\"form-label\">Model Name</label>\n                            <select class=\"input\" id=\"modelName\">\n                                <option value=\"gpt-4o\">gpt-4o</option>\n                                <option value=\"gpt-3.5-turbo\">gpt-3.5-turbo</option>\n                                <option value=\"gpt-4\">gpt-4</option>\n                                <option value=\"gpt-4-turbo\">gpt-4-turbo</option>\n                            </select>\n                        </div>\n                        <div class=\"form-group\">\n                            <label class=\"form-label\">API Key</label>\n                            <input type=\"password\" class=\"input\" id=\"apiKey\" placeholder=\"Enter your API key\">\n                        </div>\n                        <div class=\"form-group\" id=\"apiUrlGroup\" style=\"display: none;\">\n                            <label class=\"form-label\">API URL</label>\n                            <input type=\"text\" class=\"input\" id=\"apiUrl\" placeholder=\"Enter API endpoint URL\">\n                            <div class=\"form-hint\">Specify the base URL for API requests</div>\n                        </div>\n                        <div class=\"form-group\">\n                            <label class=\"form-label\">Temperature: <span id=\"tempValue\">0</span></label>\n                            <input type=\"range\" class=\"range-slider\" id=\"temperature\" min=\"0\" max=\"2\" step=\"0.1\" value=\"0\">\n                            <div class=\"range-labels\">\n                                <span>0 (Deterministic)</span>\n                                <span>1 (Balanced)</span>\n                                <span>2 (Creative)</span>\n                            </div>\n                        </div>\n                        <div style=\"display: flex; gap: 1rem; margin-top: 2rem;\">\n                            <button class=\"btn btn-secondary\" id=\"cancelConfig\">Cancel</button>\n                            <button class=\"btn btn-primary\" id=\"saveConfig\">\n                                <span>✓</span>\n                                <span>Save Configuration</span>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </main>\n    </div>\n\n    <!-- File Preview Modal -->\n    <div class=\"modal\" id=\"fileModal\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h3 class=\"modal-title\" id=\"modalFileName\">File Preview</h3>\n                <button class=\"modal-close\" id=\"closeModal\">×</button>\n            </div>\n            <div class=\"modal-body\">\n                <iframe id=\"fileFrame\" style=\"width: 100%; height: 600px; border: none;\"></iframe>\n            </div>\n        </div>\n    </div>\n\n    <!-- Toast Container -->\n    <div class=\"toast-container\" id=\"toastContainer\"></div>\n\n    <script>\n        // ==================== STATE MANAGEMENT ====================\n        const state = {\n            currentPage: 'chat',\n            theme: localStorage.getItem('theme') || 'light',\n            chatHistory: [],\n            papers: [],\n            messages: [],\n            currentThreadId: '',\n            followUpEnabled: true,\n            config: null,\n            selectedFile: null,\n            isLoading: false\n        };\n\n        // ==================== UTILITY FUNCTIONS ====================\n        function generateId() {\n            return Math.random().toString(36).substr(2, 9);\n        }\n\n        function generateThreadId() {\n            const now = new Date();\n            const timestamp = now.getFullYear().toString() +\n                             (now.getMonth() + 1).toString().padStart(2, '0') +\n                             now.getDate().toString().padStart(2, '0') +\n                             now.getHours().toString().padStart(2, '0') +\n                             now.getMinutes().toString().padStart(2, '0') +\n                             now.getSeconds().toString().padStart(2, '0');\n            const randomId = Math.random().toString(36).substring(2, 10);\n            return `research_agent_${timestamp}_${randomId}`;\n        }\n\n        function generateFileId(fileName) {\n            const timestamp = Date.now();\n            const random = Math.random().toString(36).substring(2, 15);\n            const sanitized = fileName.replace(/[^a-zA-Z0-9]/g, '_');\n            return `${sanitized}_${timestamp}_${random}`;\n        }\n\n        function generateUUID() {\n            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {\n                const r = Math.random() * 16 | 0;\n                const v = c === 'x' ? r : (r & 0x3 | 0x8);\n                return v.toString(16);\n            });\n        }\n\n        function formatTime(date) {\n            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });\n        }\n\n        // ==================== TOAST NOTIFICATIONS ====================\n        function showToast(message, type = 'info') {\n            const container = document.getElementById('toastContainer');\n            const toast = document.createElement('div');\n            toast.className = `toast ${type}`;\n            toast.innerHTML = `\n                <span>${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}</span>\n                <span>${message}</span>\n            `;\n            container.appendChild(toast);\n\n            setTimeout(() => {\n                toast.remove();\n            }, 4000);\n        }\n\n        // ==================== THEME MANAGEMENT ====================\n        function initTheme() {\n            document.documentElement.setAttribute('data-theme', state.theme);\n            updateThemeButton();\n        }\n\n        function toggleTheme() {\n            state.theme = state.theme === 'light' ? 'dark' : 'light';\n            localStorage.setItem('theme', state.theme);\n            document.documentElement.setAttribute('data-theme', state.theme);\n            updateThemeButton();\n        }\n\n        function updateThemeButton() {\n            const icon = document.getElementById('themeIcon');\n            const text = document.getElementById('themeText');\n            if (state.theme === 'dark') {\n                icon.textContent = '☀️';\n                text.textContent = 'Light';\n            } else {\n                icon.textContent = '🌙';\n                text.textContent = 'Dark';\n            }\n        }\n\n        // ==================== API FUNCTIONS ====================\n        async function apiCall(endpoint, options = {}) {\n            try {\n                const response = await fetch(endpoint, {\n                    ...options,\n                    headers: {\n                        'Content-Type': 'application/json',\n                        ...options.headers\n                    }\n                });\n\n                if (!response.ok && !options.skipErrorCheck) {\n                    throw new Error(`HTTP error! status: ${response.status}`);\n                }\n\n                return response;\n            } catch (error) {\n                console.error('API call error:', error);\n                throw error;\n            }\n        }\n\n        async function getAgentConfig() {\n            try {\n                const response = await apiCall('/temp/ai-research-agent/get-config');\n                const data = await response.json();\n                return data;\n            } catch (error) {\n                console.error('Error getting config:', error);\n                return { success: false, error: error.message };\n            }\n        }\n\n        async function updateAgentConfig(config) {\n            try {\n                const response = await apiCall('/temp/ai-research-agent/update-config', {\n                    method: 'POST',\n                    body: JSON.stringify(config)\n                });\n                const data = await response.json();\n                return data;\n            } catch (error) {\n                console.error('Error updating config:', error);\n                return { success: false, error: error.message };\n            }\n        }\n\n        async function uploadPaper(file, fileId) {\n            try {\n                const formData = new FormData();\n                formData.append('file', file);\n                formData.append('fileId', fileId);\n\n                const response = await fetch('/temp/ai-research-agent/upload', {\n                    method: 'POST',\n                    body: formData\n                });\n\n                const data = await response.json();\n                return data;\n            } catch (error) {\n                console.error('Error uploading paper:', error);\n                return { success: false, error: error.message };\n            }\n        }\n\n        async function updateConfigForFileUpload(fileName, fileId) {\n            try {\n                const configResponse = await getAgentConfig();\n                if (!configResponse.success) {\n                    return { success: false, error: 'Failed to get current configuration' };\n                }\n\n                const currentConfig = configResponse.data;\n                const currentAgent = currentConfig.agent_workflow?.agents?.[0];\n                const currentSystemMessage = currentAgent?.system_message || '';\n\n                const databasePickerInstructions = \" First, use the `database_picker` tool to perform a vector search for relevant research information based on the user's query. If the vector search does not return any suitable results, then use the Arxiv tool to retrieve and process academic papers, extracting key findings, methodologies, and references. Clearly mention in your response whether the information was retrieved using the Arxiv tool.\";\n\n                const updatedSystemMessage = currentSystemMessage.includes('database_picker')\n                    ? currentSystemMessage\n                    : `${currentSystemMessage}${databasePickerInstructions}`;\n\n                const newFilePath = `user_storage/ResearchDocs/${fileName}`;\n\n                const updatedConfig = {\n                    ...currentConfig,\n                    agent_workflow: {\n                        ...currentConfig.agent_workflow,\n                        agents: {\n                            ...currentConfig.agent_workflow.agents,\n                            \"0\": {\n                                ...currentAgent,\n                                system_message: updatedSystemMessage,\n                                tools: {\n                                    ...currentAgent.tools,\n                                    \"1\": {\n                                        name: \"retriever\",\n                                        collection_name: \"ResearchDocs\",\n                                        files_path: [newFilePath],\n                                        file_id: [fileId],\n                                        base_directory: \"private\"\n                                    }\n                                }\n                            }\n                        }\n                    }\n                };\n\n                return await updateAgentConfig(updatedConfig);\n            } catch (error) {\n                console.error('Error updating config for file upload:', error);\n                return { success: false, error: error.message };\n            }\n        }\n\n        async function getAllPapers() {\n            try {\n                const response = await apiCall('/temp/ai-research-agent/get-data');\n                const data = await response.json();\n                return data;\n            } catch (error) {\n                console.error('Error getting papers:', error);\n                return { success: false, error: error.message };\n            }\n        }\n\n        async function sendChatMessage(message) {\n            try {\n                const payload = {\n                    searchText: message,\n                    sessionid: generateUUID(),\n                    user_id: generateUUID(),\n                    flow_id: \"research_agent\"\n                };\n\n                const response = await apiCall('/research_agent_chat', {\n                    method: 'POST',\n                    body: JSON.stringify(payload)\n                });\n\n                // First try to get response as text\n                const textResponse = await response.text();\n                \n                // Try to parse as JSON\n                try {\n                    const data = JSON.parse(textResponse);\n                    \n                    // Check for response in various fields\n                    const possibleResponse = data.response || data.message || data.answer || \n                                           data.result || data.text || data.content;\n                    \n                    if (possibleResponse && typeof possibleResponse === 'string') {\n                        // Remove trailing {} if present\n                        return possibleResponse.replace(/\\s*\\{\\}\\s*$/, '').trim();\n                    }\n                    \n                    // If data is an empty object or array, return a default message\n                    if (data && typeof data === 'object') {\n                        const stringified = JSON.stringify(data);\n                        if (stringified === '{}' || stringified === '[]') {\n                            return 'I received your message but had trouble generating a response. Please try again.';\n                        }\n                        // Remove trailing {} from stringified response\n                        return stringified.replace(/\\s*\\{\\}\\s*$/, '').trim();\n                    }\n                } catch (parseError) {\n                    // If JSON parsing fails, treat as plain text response\n                    if (textResponse && textResponse.trim()) {\n                        // Remove trailing {} if present\n                        return textResponse.replace(/\\s*\\{\\}\\s*$/, '').trim();\n                    }\n                }\n                \n                return 'I received your message but had trouble generating a response. Please try again.';\n            } catch (error) {\n                console.error('Error sending chat message:', error);\n                throw error;\n            }\n        }\n\n        // ==================== WARM-UP AND TRIGGER API ====================\n        // Warm start agent - stream-safe initialization with 3-minute timeout\n        async function warmStartAgent(config, timeoutMs = 180000) {\n            try {\n                const payload = {\n                    ...config,\n                    question: 'Warm start',\n                    warmup: true,\n                    no_stream: true\n                };\n\n                const controller = new AbortController();\n                const timer = setTimeout(() => controller.abort(), timeoutMs);\n\n                try {\n                    const res = await fetch('/trigger-research-agent', {\n                        method: 'POST',\n                        headers: {\n                            'Content-Type': 'application/json',\n                            'Accept': 'text/event-stream, application/json'\n                        },\n                        body: JSON.stringify(payload),\n                        signal: controller.signal\n                    });\n\n                    if (res.body) {\n                        const reader = res.body.getReader();\n                        try {\n                            await reader.read();\n                        } catch (e) {\n                            // Ignore read/abort errors\n                        } finally {\n                            reader.releaseLock();\n                        }\n                    }\n\n                    return { success: true };\n                } finally {\n                    clearTimeout(timer);\n                    controller.abort();\n                }\n            } catch (error) {\n                console.error('Warm start error:', error);\n                return { success: false, error: 'Warm start failed or aborted' };\n            }\n        }\n\n        // Trigger AI agent with configuration\n        async function triggerAIAgentWithConfig(config, question) {\n            try {\n                const configToUse = config || (await getAgentConfig()).data;\n                \n                if (!configToUse) {\n                    return { success: false, error: 'Failed to get agent configuration' };\n                }\n\n                const apiKey = configToUse.agent_workflow?.agents?.[0]?.llm?.api_key;\n                if (!apiKey || apiKey.trim() === '') {\n                    return { success: false, error: 'Please configure your API key in the Config tab' };\n                }\n\n                const configWithParams = {\n                    ...configToUse,\n                    question: question\n                };\n\n                const response = await fetch('/trigger-research-agent', {\n                    method: 'POST',\n                    headers: { 'Content-Type': 'application/json' },\n                    body: JSON.stringify(configWithParams)\n                });\n\n                const data = await response.json();\n                return { success: true, data: data };\n            } catch (error) {\n                console.error('Trigger AI Agent error:', error);\n                return { success: false, error: 'Failed to trigger AI agent' };\n            }\n        }\n\n        // Initialize AI agent on startup\n        async function initializeAIAgent() {\n            try {\n                console.log('Checking AI agent configuration on startup...');\n                \n                const configResponse = await getAgentConfig();\n                \n                if (!configResponse.success) {\n                    console.warn('Failed to get configuration:', configResponse.error);\n                    return;\n                }\n\n                const config = configResponse.data;\n                const llmConfig = config?.agent_workflow?.agents?.[0]?.llm;\n\n                if (!llmConfig || !llmConfig.api_key || llmConfig.api_key.trim() === '') {\n                    console.log('LLM configuration incomplete - API key missing');\n                    return;\n                }\n\n                if (!llmConfig.model_type || !llmConfig.model_name) {\n                    console.log('LLM configuration incomplete - model type or name missing');\n                    return;\n                }\n\n                console.log('LLM configuration is complete. Performing warm start...');\n\n                // Clear retriever tool arrays before warm start\n                const configForTrigger = {\n                    ...config,\n                    agent_workflow: {\n                        ...config.agent_workflow,\n                        agents: {\n                            ...config.agent_workflow.agents,\n                            \"0\": {\n                                ...config.agent_workflow.agents[\"0\"],\n                                tools: Object.fromEntries(\n                                    Object.entries(config.agent_workflow.agents[\"0\"].tools || {}).map(\n                                        ([key, tool]) => {\n                                            if (tool.name === \"retriever\") {\n                                                return [key, {\n                                                    ...tool,\n                                                    files_path: [],\n                                                    file_id: []\n                                                }];\n                                            }\n                                            return [key, tool];\n                                        }\n                                    )\n                                )\n                            }\n                        }\n                    }\n                };\n\n                console.log('Set empty files_path and file_id for retriever tool in startup trigger');\n\n                const warmupResponse = await warmStartAgent(configForTrigger, 180000);\n\n                if (warmupResponse.success) {\n                    console.log('AI agent warm start completed');\n                } else {\n                    console.warn('AI agent warm start failed:', warmupResponse.error);\n                }\n\n            } catch (error) {\n                console.error('Error initializing AI agent on startup:', error);\n            }\n        }\n\n        async function summarizeFile(fileId, onChunk) {\n            try {\n                const configResponse = await getAgentConfig();\n                if (!configResponse.success) {\n                    return { success: false, error: 'Failed to get configuration' };\n                }\n\n                const llmConfig = configResponse.data?.agent_workflow?.agents?.[0]?.llm;\n\n                if (!llmConfig?.api_key || llmConfig.api_key.trim() === '') {\n                    return { success: false, error: 'Please configure your API key in the Config tab' };\n                }\n\n                const payload = {\n                    llm_config: {\n                        model_type: llmConfig.model_type || \"openai\",\n                        model_name: llmConfig.model_name || \"gpt-4o\",\n                        api_key: llmConfig.api_key,\n                        temperature: llmConfig.temperature || 0.6,\n                        ...(llmConfig.model_type === 'openai_style' && llmConfig.api_url ? { api_url: llmConfig.api_url } : {})\n                    },\n                    vdb_config: {\n                        file_id: fileId,\n                        collection_name: \"ResearchDocs\"\n                    }\n                };\n\n                const response = await fetch('/research_agent_file_summarize', {\n                    method: 'POST',\n                    headers: { 'Content-Type': 'application/json' },\n                    body: JSON.stringify(payload)\n                });\n\n                if (!response.ok) {\n                    throw new Error(`HTTP error! status: ${response.status}`);\n                }\n\n                const reader = response.body?.getReader();\n                if (!reader) {\n                    throw new Error('No response body reader available');\n                }\n\n                let raw = '';\n                let normalized = '';\n                const decoder = new TextDecoder();\n\n                const normalizeMarkdown = (text) => {\n                    let s = text;\n                    s = s.replace(/[ \\t]{2,}/g, ' ');\n                    s = s.replace(/\\s+([.,:;!?])/g, '$1');\n                    s = s.replace(/\\(\\s+/g, '(').replace(/\\s+\\)/g, ')');\n                    s = s.replace(/[ \\t]+\\n/g, '\\n');\n                    s = s.replace(/\\*\\*\\s+/g, '**').replace(/\\s+\\*\\*/g, '**');\n                    s = s.replace(/([A-Za-z0-9])\\s*-\\s*([A-Za-z0-9])/g, '$1-$2');\n                    return s;\n                };\n\n                try {\n                    while (true) {\n                        const { done, value } = await reader.read();\n                        if (done) break;\n\n                        const chunk = decoder.decode(value, { stream: true });\n                        const lines = chunk.split('\\n');\n\n                        for (const line of lines) {\n                            const trimmed = line.trim();\n\n                            if (trimmed.startsWith('event:')) {\n                                if (trimmed === 'event: end') {\n                                    return { success: true, data: normalized.trim() };\n                                }\n                                continue;\n                            }\n\n                            if (trimmed.startsWith('data:')) {\n                                let data = trimmed.slice(5).trimStart();\n\n                                if (data === '[DONE]') {\n                                    return { success: true, data: normalized.trim() };\n                                }\n\n                                let segment = '';\n                                if (data === '') {\n                                    segment = '\\n\\n';\n                                } else if (data === '-') {\n                                    segment = '\\n- ';\n                                } else {\n                                    segment = data + ' ';\n                                }\n\n                                raw += segment;\n\n                                const newNormalized = normalizeMarkdown(raw);\n                                const delta = newNormalized.slice(normalized.length);\n                                if (delta && onChunk) {\n                                    onChunk(delta);\n                                }\n                                normalized = newNormalized;\n                            }\n                        }\n                    }\n\n                    return { success: true, data: normalized.trim() };\n                } finally {\n                    reader.releaseLock();\n                }\n            } catch (error) {\n                console.error('Summarization error:', error);\n                return { success: false, error: 'Failed to summarize file' };\n            }\n        }\n\n        // ==================== UI RENDERING ====================\n        function renderPapersList() {\n            const container = document.getElementById('papersList');\n            \n            if (state.papers.length === 0) {\n                container.innerHTML = `\n                    <div class=\"empty-state\">\n                        <div class=\"empty-icon\">📄</div>\n                        <p>No papers uploaded yet</p>\n                    </div>\n                `;\n                return;\n            }\n\n            container.innerHTML = state.papers.map(paper => `\n                <div class=\"paper-item\" data-paper-id=\"${paper.id || paper.fileId}\">\n                    <div class=\"paper-info\">\n                        <div class=\"paper-title\">${paper.originalFileName || paper.title || 'Untitled'}</div>\n                    </div>\n                    <div class=\"paper-actions\">\n                        <button class=\"icon-btn\" onclick=\"handleSummarize('${paper.fileId}')\" title=\"Summarize\">\n                            📝\n                        </button>\n                        <button class=\"icon-btn\" onclick=\"handlePreview('${paper.originalFileName || paper.title}')\" title=\"Preview\">\n                            👁️\n                        </button>\n                    </div>\n                </div>\n            `).join('');\n        }\n\n        function renderChatHistory() {\n            const container = document.getElementById('historyList');\n            const history = state.chatHistory;\n            \n            const hasHistory = history.today?.length > 0 || history.yesterday?.length > 0 || \n                              history.previous7Days?.length > 0 || history.previous30Days?.length > 0;\n            \n            if (!hasHistory) {\n                container.innerHTML = `\n                    <div class=\"empty-state\">\n                        <div class=\"empty-icon\">📝</div>\n                        <p>No chat history</p>\n                    </div>\n                `;\n                return;\n            }\n            \n            const expandedSections = {\n                today: document.getElementById('todayContent')?.classList.contains('collapsed') === false,\n                yesterday: document.getElementById('yesterdayContent')?.classList.contains('collapsed') === false,\n                previous7Days: document.getElementById('previous7DaysContent')?.classList.contains('collapsed') === false,\n                previous30Days: document.getElementById('previous30DaysContent')?.classList.contains('collapsed') === false\n            };\n            \n            let html = '';\n            \n            if (history.today && history.today.length > 0) {\n                html += `\n                    <div class=\"history-category\">\n                        <h4 onclick=\"toggleHistoryCategory('todayContent')\">\n                            <span>Today</span>\n                            <i class=\"fa-solid fa-chevron-down collapse-icon\" id=\"todayContentIcon\"></i>\n                        </h4>\n                        <div id=\"todayContent\" class=\"history-category-content collapsed\">\n                `;\n                history.today.forEach(session => {\n                    html += `\n                        <div class=\"history-item\" onclick=\"handleHistoryItemClick('${session.session_id}')\" style=\"cursor: pointer;\">\n                            <div class=\"history-title\">${session.title || session.preview || 'Conversation'}</div>\n                        </div>\n                    `;\n                });\n                html += '</div></div>';\n            }\n            \n            if (history.yesterday && history.yesterday.length > 0) {\n                html += `\n                    <div class=\"history-category\">\n                        <h4 onclick=\"toggleHistoryCategory('yesterdayContent')\">\n                            <span>Yesterday</span>\n                            <i class=\"fa-solid fa-chevron-down collapse-icon\" id=\"yesterdayContentIcon\"></i>\n                        </h4>\n                        <div id=\"yesterdayContent\" class=\"history-category-content collapsed\">\n                `;\n                history.yesterday.forEach(session => {\n                    html += `\n                        <div class=\"history-item\" onclick=\"handleHistoryItemClick('${session.session_id}')\" style=\"cursor: pointer;\">\n                            <div class=\"history-title\">${session.title || session.preview || 'Conversation'}</div>\n                        </div>\n                    `;\n                });\n                html += '</div></div>';\n            }\n            \n            if (history.previous7Days && history.previous7Days.length > 0) {\n                html += `\n                    <div class=\"history-category\">\n                        <h4 onclick=\"toggleHistoryCategory('previous7DaysContent')\">\n                            <span>Previous 7 Days</span>\n                            <i class=\"fa-solid fa-chevron-down collapse-icon\" id=\"previous7DaysContentIcon\"></i>\n                        </h4>\n                        <div id=\"previous7DaysContent\" class=\"history-category-content collapsed\">\n                `;\n                history.previous7Days.forEach(session => {\n                    html += `\n                        <div class=\"history-item\" onclick=\"handleHistoryItemClick('${session.session_id}')\" style=\"cursor: pointer;\">\n                            <div class=\"history-title\">${session.title || session.preview || 'Conversation'}</div>\n                        </div>\n                    `;\n                });\n                html += '</div></div>';\n            }\n            \n            if (history.previous30Days && history.previous30Days.length > 0) {\n                html += `\n                    <div class=\"history-category\">\n                        <h4 onclick=\"toggleHistoryCategory('previous30DaysContent')\">\n                            <span>Previous 30 Days</span>\n                            <i class=\"fa-solid fa-chevron-down collapse-icon\" id=\"previous30DaysContentIcon\"></i>\n                        </h4>\n                        <div id=\"previous30DaysContent\" class=\"history-category-content collapsed\">\n                `;\n                history.previous30Days.forEach(session => {\n                    html += `\n                        <div class=\"history-item\" onclick=\"handleHistoryItemClick('${session.session_id}')\" style=\"cursor: pointer;\">\n                            <div class=\"history-title\">${session.title || session.preview || 'Conversation'}</div>\n                        </div>\n                    `;\n                });\n                html += '</div></div>';\n            }\n            \n            container.innerHTML = html;\n            \n            if (expandedSections.today) {\n                const todayContent = document.getElementById('todayContent');\n                const todayIcon = document.getElementById('todayContentIcon');\n                if (todayContent && todayIcon) {\n                    todayContent.classList.remove('collapsed');\n                    todayIcon.classList.remove('fa-chevron-down');\n                    todayIcon.classList.add('fa-chevron-up');\n                }\n            }\n            if (expandedSections.yesterday) {\n                const yesterdayContent = document.getElementById('yesterdayContent');\n                const yesterdayIcon = document.getElementById('yesterdayContentIcon');\n                if (yesterdayContent && yesterdayIcon) {\n                    yesterdayContent.classList.remove('collapsed');\n                    yesterdayIcon.classList.remove('fa-chevron-down');\n                    yesterdayIcon.classList.add('fa-chevron-up');\n                }\n            }\n            if (expandedSections.previous7Days) {\n                const previous7DaysContent = document.getElementById('previous7DaysContent');\n                const previous7DaysIcon = document.getElementById('previous7DaysContentIcon');\n                if (previous7DaysContent && previous7DaysIcon) {\n                    previous7DaysContent.classList.remove('collapsed');\n                    previous7DaysIcon.classList.remove('fa-chevron-down');\n                    previous7DaysIcon.classList.add('fa-chevron-up');\n                }\n            }\n            if (expandedSections.previous30Days) {\n                const previous30DaysContent = document.getElementById('previous30DaysContent');\n                const previous30DaysIcon = document.getElementById('previous30DaysContentIcon');\n                if (previous30DaysContent && previous30DaysIcon) {\n                    previous30DaysContent.classList.remove('collapsed');\n                    previous30DaysIcon.classList.remove('fa-chevron-down');\n                    previous30DaysIcon.classList.add('fa-chevron-up');\n                }\n            }\n        }\n\n        function toggleHistoryCategory(categoryId) {\n            const content = document.getElementById(categoryId);\n            const icon = document.getElementById(`${categoryId}Icon`);\n            \n            if (content && icon) {\n                content.classList.toggle('collapsed');\n                \n                if (icon.classList.contains('fa-chevron-up')) {\n                    icon.classList.remove('fa-chevron-up');\n                    icon.classList.add('fa-chevron-down');\n                } else {\n                    icon.classList.remove('fa-chevron-down');\n                    icon.classList.add('fa-chevron-up');\n                }\n            }\n        }\n\n        function toggleSection(sectionName) {\n            const content = document.getElementById(`${sectionName}List`);\n            const icon = document.getElementById(`${sectionName}Icon`);\n            \n            if (content && icon) {\n                content.classList.toggle('collapsed');\n                \n                if (icon.classList.contains('fa-chevron-up')) {\n                    icon.classList.remove('fa-chevron-up');\n                    icon.classList.add('fa-chevron-down');\n                } else {\n                    icon.classList.remove('fa-chevron-down');\n                    icon.classList.add('fa-chevron-up');\n                }\n            }\n        }\n\n        async function getChatHistory(flowId) {\n            try {\n                const response = await apiCall(`/api/agent-chat-logs?flow_id=${flowId}&include_preview=true`);\n                const data = await response.json();\n                \n                return { \n                    success: true, \n                    data: {\n                        today: data.today || [],\n                        yesterday: data.yesterday || [],\n                        previous7Days: data.previous7Days || [],\n                        previous30Days: data.previous30Days || []\n                    }\n                };\n            } catch (error) {\n                console.error('Error getting chat history:', error);\n                return { success: false, error: error.message };\n            }\n        }\n\n        async function loadChatHistory() {\n            try {\n                const response = await getChatHistory('research_agent');\n                if (response.success && response.data) {\n                    state.chatHistory = response.data;\n                    renderChatHistory();\n                }\n            } catch (error) {\n                console.error('Error loading chat history:', error);\n            }\n        }\n\n        async function handleHistoryItemClick(sessionId) {\n            try {\n                const response = await apiCall(`/api/agent-chat-logs/get/${sessionId}?flow_id=research_agent`);\n                const history = await response.json();\n                \n                state.currentThreadId = sessionId;\n                state.messages = [];\n\n                if (history && Array.isArray(history)) {\n                    history.forEach(msg => {\n                        if (msg.user && msg.user.mssg) {\n                            addMessage(msg.user.mssg, true);\n                        }\n                        if (msg.bot && msg.bot.mssg) {\n                            addMessage(msg.bot.mssg, false);\n                        }\n                    });\n                }\n\n                renderChatHistory();\n            } catch (error) {\n                console.error('Error loading chat history:', error);\n                showToast('Failed to load chat history', 'error');\n            }\n        }\n\n        function showConfigPrompt() {\n            const container = document.getElementById('toastContainer');\n            const toast = document.createElement('div');\n            toast.className = 'toast';\n            toast.style.minWidth = '350px';\n            toast.style.backgroundColor = 'var(--bg-secondary)';\n            toast.style.color = 'var(--text-primary)';\n            toast.style.border = '2px solid var(--accent-primary)';\n            toast.innerHTML = `\n                <div style=\"display: flex; flex-direction: column; gap: 0.75rem; width: 100%;\">\n                    <div style=\"display: flex; align-items: center; gap: 0.75rem;\">\n                        <span style=\"font-size: 1.5rem;\">⚠️</span>\n                        <div>\n                            <div style=\"font-weight: 600; margin-bottom: 0.25rem; color: var(--text-primary);\">Configuration Required</div>\n                            <div style=\"font-size: 0.85rem; color: var(--text-secondary);\">Please set up your API key to use this feature.</div>\n                        </div>\n                    </div>\n                    <div style=\"display: flex; gap: 0.5rem; justify-content: flex-end;\">\n                        <button onclick=\"this.closest('.toast').remove()\" style=\"padding: 0.4rem 0.8rem; background: var(--bg-tertiary); border: none; border-radius: 4px; color: var(--text-primary); cursor: pointer; font-size: 0.85rem; transition: background-color 0.2s;\" onmouseover=\"this.style.backgroundColor='var(--bg-hover)'\" onmouseout=\"this.style.backgroundColor='var(--bg-tertiary)'\">Cancel</button>\n                        <button onclick=\"switchPage('config'); this.closest('.toast').remove();\" style=\"padding: 0.4rem 0.8rem; background: var(--accent-primary); border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: background-color 0.2s;\" onmouseover=\"this.style.backgroundColor='var(--accent-secondary)'\" onmouseout=\"this.style.backgroundColor='var(--accent-primary)'\">Go to Config</button>\n                    </div>\n                </div>\n            `;\n            container.appendChild(toast);\n\n            setTimeout(() => {\n                toast.remove();\n            }, 8000);\n        }\n\n        async function checkConfigAndShowPrompt() {\n            try {\n                const configResponse = await getAgentConfig();\n                if (!configResponse.success) {\n                    return false;\n                }\n\n                const llmConfig = configResponse.data?.agent_workflow?.agents?.[0]?.llm;\n                if (!llmConfig?.api_key || llmConfig.api_key.trim() === '') {\n                    showConfigPrompt();\n                    return false;\n                }\n\n                return true;\n            } catch (error) {\n                console.error('Error checking config:', error);\n                return false;\n            }\n        }\n\n        function renderChatMessages() {\n            const container = document.getElementById('chatMessages');\n            \n            if (state.messages.length === 0) {\n                container.innerHTML = `\n                    <div class=\"empty-state\">\n                        <div class=\"empty-icon\">💬</div>\n                        <h3 style=\"color: var(--text-primary); margin-bottom: 0.5rem;\">Welcome to AI Research Assistant</h3>\n                        <p>Upload your research papers and start asking questions.</p>\n                    </div>\n                `;\n                return;\n            }\n\n            container.innerHTML = state.messages.map(msg => `\n                <div class=\"chat-message ${msg.isUser ? 'user' : 'ai'}\">\n                    <div class=\"message-avatar ${msg.isUser ? 'user' : 'ai'}\">\n                        ${msg.isUser ? '👤' : '🤖'}\n                    </div>\n                    <div>\n                        <div class=\"message-content\">${formatMessage(msg.content)}</div>\n                        <div class=\"message-time\">${formatTime(msg.timestamp)}</div>\n                    </div>\n                </div>\n            `).join('');\n\n            container.scrollTop = container.scrollHeight;\n        }\n\n        function formatMessage(content) {\n            // Simple markdown-like formatting\n            let formatted = content\n                .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n                .replace(/\\*(.*?)\\*/g, '<em>$1</em>')\n                .replace(/\\n/g, '<br>');\n            return formatted;\n        }\n\n        function addMessage(content, isUser = false) {\n            const message = {\n                id: generateId(),\n                content,\n                isUser,\n                timestamp: new Date()\n            };\n            state.messages.push(message);\n            renderChatMessages();\n            return message;\n        }\n\n        function updateLastMessage(content) {\n            if (state.messages.length > 0) {\n                state.messages[state.messages.length - 1].content = content;\n                renderChatMessages();\n            }\n        }\n\n        function showLoadingMessage() {\n            const container = document.getElementById('chatMessages');\n            const loadingDiv = document.createElement('div');\n            loadingDiv.className = 'chat-message ai';\n            loadingDiv.id = 'loadingMessage';\n            loadingDiv.innerHTML = `\n                <div class=\"message-avatar ai\">🤖</div>\n                <div>\n                    <div class=\"message-content\">\n                        <div class=\"loading\">\n                            <div class=\"loading-dot\"></div>\n                            <div class=\"loading-dot\"></div>\n                            <div class=\"loading-dot\"></div>\n                        </div>\n                    </div>\n                </div>\n            `;\n            container.appendChild(loadingDiv);\n            container.scrollTop = container.scrollHeight;\n        }\n\n        function removeLoadingMessage() {\n            const loading = document.getElementById('loadingMessage');\n            if (loading) {\n                loading.remove();\n            }\n        }\n\n        // ==================== PAGE NAVIGATION ====================\n        function switchPage(pageName) {\n            // Update header nav items\n            document.querySelectorAll('.header-nav').forEach(item => {\n                item.classList.remove('active');\n                if (item.dataset.page === pageName) {\n                    item.classList.add('active');\n                }\n            });\n\n            // Update page content\n            document.querySelectorAll('.page-content').forEach(page => {\n                page.classList.add('hidden');\n            });\n            document.getElementById(`${pageName}Page`).classList.remove('hidden');\n\n            state.currentPage = pageName;\n\n            // Load data for specific pages\n            if (pageName === 'instructions') {\n                loadInstructions();\n            } else if (pageName === 'config') {\n                loadConfig();\n            } else if (pageName === 'chat') {\n                loadChatHistory();\n            }\n        }\n\n        // ==================== CHAT HANDLERS ====================\n        function handleNewChat() {\n            state.messages = [];\n            state.currentThreadId = generateThreadId();\n            renderChatMessages();\n            switchPage('chat');\n            showToast('New chat started', 'info');\n        }\n\n        function handleFollowUpToggle() {\n            state.followUpEnabled = !state.followUpEnabled;\n            const toggle = document.getElementById('followUpToggle');\n            \n            if (state.followUpEnabled) {\n                toggle.classList.add('active');\n                showToast('Follow-up mode enabled', 'info');\n            } else {\n                toggle.classList.remove('active');\n                showToast('Follow-up mode disabled', 'info');\n                state.currentThreadId = generateThreadId();\n            }\n        }\n\n        async function handleSendMessage() {\n            const input = document.getElementById('chatInput');\n            const sendBtn = document.getElementById('sendBtn');\n            const message = input.value.trim();\n\n            if (!message || state.isLoading) return;\n\n            const hasConfig = await checkConfigAndShowPrompt();\n            if (!hasConfig) {\n                return;\n            }\n\n            // Add user message\n            addMessage(message, true);\n            input.value = '';\n\n            // Disable input and button during AI response\n            state.isLoading = true;\n            input.disabled = true;\n            sendBtn.disabled = true;\n            showLoadingMessage();\n\n            try {\n                const response = await sendChatMessage(message);\n                removeLoadingMessage();\n                addMessage(response, false);\n                \n                await loadChatHistory();\n            } catch (error) {\n                removeLoadingMessage();\n                addMessage('Sorry, I encountered an error. Please try again.', false);\n                showToast('Failed to send message', 'error');\n            } finally {\n                // Re-enable input and button after response\n                state.isLoading = false;\n                input.disabled = false;\n                sendBtn.disabled = false;\n                input.focus();\n            }\n        }\n\n        async function handleSummarize(fileId) {\n            if (!fileId) {\n                showToast('File ID not found', 'error');\n                return;\n            }\n\n            // Switch to chat page\n            switchPage('chat');\n\n            const input = document.getElementById('chatInput');\n            const sendBtn = document.getElementById('sendBtn');\n\n            // Disable input during summarization\n            state.isLoading = true;\n            input.disabled = true;\n            sendBtn.disabled = true;\n\n            // Add initial message\n            const initialMsg = addMessage('**File Summary**\\n\\nGenerating summary...', false);\n\n            try {\n                let streamedContent = '**File Summary**\\n\\n';\n\n                await summarizeFile(fileId, (chunk) => {\n                    streamedContent += chunk;\n                    updateLastMessage(streamedContent);\n                });\n\n                showToast('File summarized successfully!', 'success');\n            } catch (error) {\n                updateLastMessage('Sorry, I couldn\\'t summarize the file. Please try again.');\n                showToast('Failed to summarize file', 'error');\n            } finally {\n                // Re-enable input after summarization\n                state.isLoading = false;\n                input.disabled = false;\n                sendBtn.disabled = false;\n            }\n        }\n\n        function handlePreview(fileName) {\n            const modal = document.getElementById('fileModal');\n            const frame = document.getElementById('fileFrame');\n            const title = document.getElementById('modalFileName');\n\n            title.textContent = fileName;\n            frame.src = `/temp/ai-research-agent/get-file-content/${encodeURIComponent(fileName)}`;\n            modal.classList.add('active');\n        }\n\n        // ==================== UPLOAD HANDLERS ====================\n        function handleFileSelect(file) {\n            if (!file) return;\n\n            state.selectedFile = file;\n            document.getElementById('fileName').textContent = file.name;\n            document.getElementById('fileSelected').classList.remove('hidden');\n            document.getElementById('uploadBtn').disabled = false;\n        }\n\n        function handleRemoveFile() {\n            state.selectedFile = null;\n            document.getElementById('fileSelected').classList.add('hidden');\n            document.getElementById('uploadBtn').disabled = true;\n            document.getElementById('fileInput').value = '';\n        }\n\n        async function handleUpload() {\n            if (!state.selectedFile) {\n                showToast('Please select a file', 'error');\n                return;\n            }\n\n            // Check if config is set up before uploading\n            const hasConfig = await checkConfigAndShowPrompt();\n            if (!hasConfig) {\n                return;\n            }\n\n            const uploadBtn = document.getElementById('uploadBtn');\n            uploadBtn.disabled = true;\n            uploadBtn.innerHTML = '<span>⏳</span><span>Uploading...</span>';\n\n            try {\n                const fileId = generateFileId(state.selectedFile.name);\n\n                // Upload file\n                const uploadResponse = await uploadPaper(state.selectedFile, fileId);\n                if (!uploadResponse.success) {\n                    throw new Error(uploadResponse.error || 'Failed to upload paper');\n                }\n\n                // Update config\n                const configUpdateResponse = await updateConfigForFileUpload(state.selectedFile.name, fileId);\n                if (!configUpdateResponse.success) {\n                    console.warn('Failed to update configuration:', configUpdateResponse.error);\n                }\n\n                uploadBtn.innerHTML = '<span>⏳</span><span>Processing...</span>';\n\n                // Get updated config and trigger AI agent\n                const updatedConfigResponse = await getAgentConfig();\n                if (updatedConfigResponse.success) {\n                    // Clear retriever tool arrays before triggering\n                    const configForTrigger = {\n                        ...updatedConfigResponse.data,\n                        agent_workflow: {\n                            ...updatedConfigResponse.data.agent_workflow,\n                            agents: {\n                                ...updatedConfigResponse.data.agent_workflow.agents,\n                                \"0\": {\n                                    ...updatedConfigResponse.data.agent_workflow.agents[\"0\"],\n                                    tools: Object.fromEntries(\n                                        Object.entries(updatedConfigResponse.data.agent_workflow.agents[\"0\"].tools || {}).map(\n                                            ([key, tool]) => {\n                                                if (tool.name === \"retriever\") {\n                                                    return [key, {\n                                                        ...tool,\n                                                        files_path: [],\n                                                        file_id: []\n                                                    }];\n                                                }\n                                                return [key, tool];\n                                            }\n                                        )\n                                    )\n                                }\n                            }\n                        }\n                    };\n\n                    try {\n                        const triggerResponse = await triggerAIAgentWithConfig(configForTrigger, 'Processing uploaded file');\n                        if (triggerResponse.success) {\n                            showToast('Document uploaded and processed successfully!', 'success');\n                        } else {\n                            showToast('Document uploaded but processing failed', 'warning');\n                        }\n                    } catch (triggerError) {\n                        console.warn('Trigger API error:', triggerError);\n                        showToast('Document uploaded but processing failed', 'warning');\n                    }\n                } else {\n                    showToast('Paper uploaded successfully!', 'success');\n                }\n\n                // Refresh papers list\n                await loadPapers();\n\n                // Reset form\n                handleRemoveFile();\n                switchPage('chat');\n            } catch (error) {\n                showToast(error.message || 'Failed to upload paper', 'error');\n            } finally {\n                uploadBtn.disabled = false;\n                uploadBtn.innerHTML = '<span>📤</span><span>Upload Paper</span>';\n            }\n        }\n\n        // ==================== INSTRUCTIONS HANDLERS ====================\n        async function loadInstructions() {\n            try {\n                const response = await getAgentConfig();\n                if (response.success && response.data) {\n                    const systemMessage = response.data.agent_workflow?.agents?.[0]?.system_message || '';\n                    document.getElementById('currentInstructions').value = systemMessage;\n                }\n            } catch (error) {\n                showToast('Failed to load instructions', 'error');\n            }\n        }\n\n        async function handleUpdateInstructions() {\n            const customInstructions = document.getElementById('customInstructions').value.trim();\n\n            if (!customInstructions) {\n                showToast('Please enter custom instructions', 'error');\n                return;\n            }\n\n            // Check if config is set up before updating instructions\n            const hasConfig = await checkConfigAndShowPrompt();\n            if (!hasConfig) {\n                return;\n            }\n\n            const btn = document.getElementById('updateInstructions');\n            btn.disabled = true;\n            btn.innerHTML = '<span>⏳</span><span>Updating...</span>';\n\n            try {\n                const configResponse = await getAgentConfig();\n                if (!configResponse.success) {\n                    throw new Error('Failed to get current configuration');\n                }\n\n                const currentAgent = configResponse.data.agent_workflow?.agents?.[0];\n                const currentSystemMessage = currentAgent?.system_message || '';\n                const updatedSystemMessage = `${currentSystemMessage} Additional Instructions: ${customInstructions}`;\n\n                // Clear retriever tool arrays\n                let updatedTools = { ...currentAgent.tools };\n                if (updatedTools[\"1\"] && updatedTools[\"1\"].name === \"retriever\") {\n                    updatedTools[\"1\"] = {\n                        ...updatedTools[\"1\"],\n                        files_path: [],\n                        file_id: []\n                    };\n                }\n\n                const updatedConfig = {\n                    ...configResponse.data,\n                    agent_workflow: {\n                        ...configResponse.data.agent_workflow,\n                        agents: {\n                            ...configResponse.data.agent_workflow.agents,\n                            \"0\": {\n                                ...currentAgent,\n                                system_message: updatedSystemMessage,\n                                tools: updatedTools\n                            }\n                        }\n                    }\n                };\n\n                const updateResponse = await updateAgentConfig(updatedConfig);\n                if (!updateResponse.success) {\n                    throw new Error('Failed to update configuration');\n                }\n\n                btn.innerHTML = '<span>⏳</span><span>Testing...</span>';\n\n                // Trigger AI agent with updated config\n                try {\n                    const triggerResponse = await triggerAIAgentWithConfig(updatedConfig, 'Testing updated instructions');\n                    if (triggerResponse.success) {\n                        showToast('Instructions updated and tested successfully!', 'success');\n                    } else {\n                        showToast('Instructions updated but test failed', 'warning');\n                    }\n                } catch (triggerError) {\n                    console.warn('Trigger API error:', triggerError);\n                    showToast('Instructions updated but test failed', 'warning');\n                }\n\n                document.getElementById('customInstructions').value = '';\n                switchPage('chat');\n            } catch (error) {\n                showToast(error.message || 'Failed to update instructions', 'error');\n            } finally {\n                btn.disabled = false;\n                btn.innerHTML = '<span>✓</span><span>Update Instructions</span>';\n            }\n        }\n\n        // ==================== CONFIG HANDLERS ====================\n        async function loadConfig() {\n            try {\n                const response = await getAgentConfig();\n                if (response.success && response.data) {\n                    const llmConfig = response.data.agent_workflow?.agents?.[0]?.llm;\n                    if (llmConfig) {\n                        const modelType = llmConfig.model_type || 'openai';\n                        \n                        if (modelType === 'openai_style') {\n                            const variant = response.data.openai_style || 'gaudi';\n                            document.getElementById('modelType').value = `openai_style_${variant}`;\n                        } else {\n                            document.getElementById('modelType').value = modelType;\n                        }\n\n                        updateModelNameField(modelType);\n                        document.getElementById('modelName').value = llmConfig.model_name || 'gpt-4o';\n                        document.getElementById('apiKey').value = llmConfig.api_key || '';\n                        document.getElementById('apiUrl').value = llmConfig.api_url || '';\n                        document.getElementById('temperature').value = llmConfig.temperature || 0;\n                        document.getElementById('tempValue').textContent = llmConfig.temperature || 0;\n\n                        updateApiUrlVisibility();\n                    }\n                }\n            } catch (error) {\n                showToast('Failed to load configuration', 'error');\n            }\n        }\n\n        function updateModelNameField(modelType) {\n            const modelNameSelect = document.getElementById('modelName');\n            \n            if (modelType === 'openai') {\n                modelNameSelect.innerHTML = `\n                    <option value=\"gpt-4o\">gpt-4o</option>\n                    <option value=\"gpt-3.5-turbo\">gpt-3.5-turbo</option>\n                    <option value=\"gpt-4\">gpt-4</option>\n                    <option value=\"gpt-4-turbo\">gpt-4-turbo</option>\n                `;\n            } else {\n                // For openai_style, convert to text input\n                const currentValue = modelNameSelect.value;\n                const parent = modelNameSelect.parentElement;\n                const newInput = document.createElement('input');\n                newInput.type = 'text';\n                newInput.id = 'modelName';\n                newInput.className = 'input';\n                newInput.placeholder = 'Enter model name';\n                newInput.value = currentValue;\n                parent.replaceChild(newInput, modelNameSelect);\n            }\n        }\n\n        function updateApiUrlVisibility() {\n            const modelType = document.getElementById('modelType').value;\n            const apiUrlGroup = document.getElementById('apiUrlGroup');\n            \n            if (modelType.startsWith('openai_style')) {\n                apiUrlGroup.style.display = 'block';\n            } else {\n                apiUrlGroup.style.display = 'none';\n            }\n        }\n\n        async function handleSaveConfig() {\n            const modelTypeValue = document.getElementById('modelType').value;\n            const apiKey = document.getElementById('apiKey').value.trim();\n\n            if (!apiKey) {\n                showToast('Please enter an API key', 'error');\n                return;\n            }\n\n            const btn = document.getElementById('saveConfig');\n            btn.disabled = true;\n            btn.innerHTML = '<span>⏳</span><span>Saving...</span>';\n\n            try {\n                const configResponse = await getAgentConfig();\n                if (!configResponse.success) {\n                    throw new Error('Failed to get current configuration');\n                }\n\n                let modelType, openaiStyleVariant;\n                if (modelTypeValue.startsWith('openai_style')) {\n                    modelType = 'openai_style';\n                    openaiStyleVariant = modelTypeValue.split('_')[2]; // gaudi or amd\n                } else {\n                    modelType = modelTypeValue;\n                }\n\n                const modelName = document.getElementById('modelName').value;\n                const apiUrl = document.getElementById('apiUrl').value;\n                const temperature = parseFloat(document.getElementById('temperature').value);\n\n                const currentAgent = configResponse.data.agent_workflow?.agents?.[0];\n\n                // Clear retriever tool arrays\n                let updatedTools = { ...currentAgent.tools };\n                if (updatedTools[\"1\"] && updatedTools[\"1\"].name === \"retriever\") {\n                    updatedTools[\"1\"] = {\n                        ...updatedTools[\"1\"],\n                        files_path: [],\n                        file_id: []\n                    };\n                }\n\n                const updatedConfig = {\n                    ...configResponse.data,\n                    ...(modelType === 'openai_style' ? { openai_style: openaiStyleVariant } : {}),\n                    agent_workflow: {\n                        ...configResponse.data.agent_workflow,\n                        agents: {\n                            ...configResponse.data.agent_workflow.agents,\n                            \"0\": {\n                                ...currentAgent,\n                                llm: {\n                                    model_type: modelType,\n                                    model_name: modelName,\n                                    api_key: apiKey,\n                                    temperature: temperature,\n                                    ...(modelType === 'openai_style' && apiUrl ? { api_url: apiUrl } : {})\n                                },\n                                tools: updatedTools\n                            }\n                        }\n                    }\n                };\n\n                const updateResponse = await updateAgentConfig(updatedConfig);\n                if (!updateResponse.success) {\n                    throw new Error('Failed to save configuration');\n                }\n\n                btn.innerHTML = '<span>⏳</span><span>Testing...</span>';\n\n                // Trigger AI agent with updated config\n                try {\n                    const triggerResponse = await triggerAIAgentWithConfig(updatedConfig, 'Testing configuration');\n                    if (triggerResponse.success) {\n                        showToast('Configuration saved and tested successfully!', 'success');\n                    } else {\n                        showToast('Configuration saved but test failed', 'warning');\n                    }\n                } catch (triggerError) {\n                    console.warn('Trigger API error:', triggerError);\n                    showToast('Configuration saved but test failed', 'warning');\n                }\n\n                switchPage('chat');\n            } catch (error) {\n                showToast(error.message || 'Failed to save configuration', 'error');\n            } finally {\n                btn.disabled = false;\n                btn.innerHTML = '<span>✓</span><span>Save Configuration</span>';\n            }\n        }\n\n        // ==================== DATA LOADING ====================\n        async function loadPapers() {\n            try {\n                const response = await getAllPapers();\n                if (response.success && response.data) {\n                    state.papers = response.data;\n                    renderPapersList();\n                }\n            } catch (error) {\n                console.error('Error loading papers:', error);\n            }\n        }\n\n        // ==================== EVENT LISTENERS ====================\n        function initEventListeners() {\n            // Theme toggle\n            document.getElementById('themeToggle').addEventListener('click', toggleTheme);\n\n            // Header Navigation\n            document.querySelectorAll('.header-nav').forEach(item => {\n                item.addEventListener('click', () => {\n                    switchPage(item.dataset.page);\n                });\n            });\n\n            // New Chat and Follow-up Toggle\n            document.getElementById('newChatBtn').addEventListener('click', handleNewChat);\n            document.getElementById('followUpToggle').addEventListener('click', handleFollowUpToggle);\n\n            // Chat\n            document.getElementById('sendBtn').addEventListener('click', handleSendMessage);\n            document.getElementById('chatInput').addEventListener('keypress', (e) => {\n                if (e.key === 'Enter' && !e.shiftKey) {\n                    e.preventDefault();\n                    handleSendMessage();\n                }\n            });\n\n            // Upload\n            const uploadZone = document.getElementById('uploadZone');\n            const fileInput = document.getElementById('fileInput');\n\n            uploadZone.addEventListener('click', () => fileInput.click());\n            \n            uploadZone.addEventListener('dragover', (e) => {\n                e.preventDefault();\n                uploadZone.classList.add('dragover');\n            });\n\n            uploadZone.addEventListener('dragleave', () => {\n                uploadZone.classList.remove('dragover');\n            });\n\n            uploadZone.addEventListener('drop', (e) => {\n                e.preventDefault();\n                uploadZone.classList.remove('dragover');\n                const file = e.dataTransfer.files[0];\n                if (file && (file.type === 'application/pdf' || file.type === 'text/plain')) {\n                    handleFileSelect(file);\n                } else {\n                    showToast('Please select a PDF or TXT file', 'error');\n                }\n            });\n\n            fileInput.addEventListener('change', (e) => {\n                const file = e.target.files[0];\n                if (file) {\n                    handleFileSelect(file);\n                }\n            });\n\n            document.getElementById('removeFile').addEventListener('click', handleRemoveFile);\n            document.getElementById('uploadBtn').addEventListener('click', handleUpload);\n\n            // Instructions\n            document.getElementById('cancelInstructions').addEventListener('click', () => {\n                switchPage('chat');\n            });\n            document.getElementById('updateInstructions').addEventListener('click', handleUpdateInstructions);\n\n            // Config\n            document.getElementById('modelType').addEventListener('change', (e) => {\n                const value = e.target.value;\n                let modelType = value;\n                \n                if (value.startsWith('openai_style')) {\n                    modelType = 'openai_style';\n                }\n                \n                updateModelNameField(modelType);\n                updateApiUrlVisibility();\n            });\n\n            document.getElementById('temperature').addEventListener('input', (e) => {\n                document.getElementById('tempValue').textContent = e.target.value;\n            });\n\n            document.getElementById('cancelConfig').addEventListener('click', () => {\n                switchPage('chat');\n            });\n            document.getElementById('saveConfig').addEventListener('click', handleSaveConfig);\n\n            // Modal\n            document.getElementById('closeModal').addEventListener('click', () => {\n                document.getElementById('fileModal').classList.remove('active');\n            });\n\n            document.getElementById('fileModal').addEventListener('click', (e) => {\n                if (e.target.id === 'fileModal') {\n                    document.getElementById('fileModal').classList.remove('active');\n                }\n            });\n        }\n\n        // ==================== INITIALIZATION ====================\n        async function init() {\n            initTheme();\n            initEventListeners();\n            \n            // Initialize thread ID\n            state.currentThreadId = generateThreadId();\n            \n            await loadPapers();\n            await loadChatHistory();\n            \n            // Initialize AI agent (warm start)\n            await initializeAIAgent();\n            \n            // Hide initialization overlay after everything is loaded\n            const overlay = document.getElementById('initOverlay');\n            overlay.classList.add('hidden');\n            \n            // Remove overlay from DOM after transition completes\n            setTimeout(() => {\n                overlay.style.display = 'none';\n            }, 500);\n            \n            console.log('AI Research Assistant initialized');\n        }\n\n        // Start the application\n        if (document.readyState === 'loading') {\n            document.addEventListener('DOMContentLoaded', init);\n        } else {\n            init();\n        }\n    </script>\n</body>\n</html>\n",
+        "output": "str",
+        "x": 300,
+        "y": 1260,
+        "wires": [
+            [
+                "ab2434cc.70036"
+            ]
+        ]
+    },
+    {
+        "id": "ab2434cc.70036",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 480,
+        "y": 1260,
+        "wires": []
+    },
+    {
+        "id": "1c2dcd5c.b79723",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "Upload Endpoint",
+        "url": "/temp/ai-research-agent/upload",
+        "method": "post",
+        "upload": true,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 1320,
+        "wires": [
+            [
+                "3112af0d.05078"
+            ]
+        ]
+    },
+    {
+        "id": "3112af0d.05078",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Process Upload Request",
+        "func": "var require = context.global.get('require');\nconst fs = require('fs');\nconst path = require('path');\nconst crypto = require('crypto');\n\n// Ensure data directory exists\nconst DATA_DIR = '/interplay_v2/public/private/user_storage/ResearchDocs/';\nif (!fs.existsSync(DATA_DIR)) {\n    fs.mkdirSync(DATA_DIR, { recursive: true });\n}\n\n// Generate a unique ID for the paper (used only for metadata)\nconst generateId = () => crypto.randomBytes(8).toString('hex');\n\n// Helper to save paper metadata\nconst savePaperMetadata = (paper) => {\n    const filePath = path.join(DATA_DIR, `${paper.id}.json`);\n    fs.writeFileSync(filePath, JSON.stringify(paper, null, 2));\n    return paper;\n};\n\nasync function processRequest() {\n    try {\n        const { title, fileId } = msg.payload;\n        const files = msg.req.files;\n\n        if (!files || files.length === 0) {\n            throw new Error('No file uploaded');\n        }\n\n        const uploadedFile = files[0];\n        const paperId = generateId();\n\n        const originalFileName = uploadedFile.originalname;\n        const newFilePath = path.join(DATA_DIR, originalFileName);\n\n        if (!uploadedFile.buffer) {\n            throw new Error('Uploaded file does not contain a buffer');\n        }\n\n        // Save the uploaded file with its original name\n        fs.writeFileSync(newFilePath, uploadedFile.buffer);\n\n        // Create paper metadata\n        const paper = {\n            id: paperId,\n      fileId: fileId,\n            title: title || path.basename(originalFileName, path.extname(originalFileName)),\n            authors: [],\n            abstract: '',\n            uploadedDate: new Date().toISOString(),\n            status: 'pending',\n            pdfPath: newFilePath,\n            originalFileName\n        };\n\n        savePaperMetadata(paper);\n\n        return { success: true, data: paper };\n    } catch (error) {\n        console.error('Error processing upload request:', error);\n        return { success: false, error: error.message || 'Failed to process upload request' };\n    }\n}\n\nprocessRequest()\n    .then(result => {\n        msg.payload = result;\n        node.send(msg);\n    })\n    .catch(error => {\n        msg.payload = { success: false, error: error.message };\n        node.send(msg);\n    });\n\nreturn null;\n",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 400,
+        "y": 1320,
+        "wires": [
+            [
+                "8ca5bf43.a8f148"
+            ]
+        ]
+    },
+    {
+        "id": "8ca5bf43.a8f148",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "Send Response",
+        "statusCode": "",
+        "headers": {
+            "content-type": "application/json"
+        },
+        "x": 650,
+        "y": 1320,
+        "wires": []
+    },
+    {
+        "id": "ac70d223.e2c858",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "GET /get-data",
+        "url": "/temp/ai-research-agent/get-data",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 1380,
+        "wires": [
+            [
+                "38f6f831.0e1328"
+            ]
+        ]
+    },
+    {
+        "id": "38f6f831.0e1328",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "List All Papers",
+        "func": "// Load all metadata JSON files from the paper directory\nconst require = context.global.get('require');\nconst fs = require('fs');\nconst path = require('path');\n\nconst DATA_DIR = '/interplay_v2/public/private/user_storage/ResearchDocs/';\n\nconst filters = msg.req.query || {}; // support optional filtering from URL query\n\ntry {\n    if (!fs.existsSync(DATA_DIR)) {\n        throw new Error('Data directory does not exist.');\n    }\n\n    const files = fs.readdirSync(DATA_DIR).filter(f => f.endsWith('.json'));\n\n    const papers = files.map(file => {\n        const raw = fs.readFileSync(path.join(DATA_DIR, file), 'utf-8');\n        return JSON.parse(raw);\n    });\n\n    // Optional filtering (e.g., by status or title substring)\n    const filtered = papers.filter(p => {\n        return Object.entries(filters).every(([key, value]) => {\n            if (typeof p[key] === 'string') {\n                return p[key].toLowerCase().includes(value.toLowerCase());\n            }\n            return true;\n        });\n    });\n\n    msg.payload = { success: true, data: filtered };\n    msg.statusCode = 200;\n} catch (err) {\n    msg.payload = { success: false, error: err.message || 'Failed to load paper metadata' };\n    msg.statusCode = 500;\n    node.error(err.message);\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 340,
+        "y": 1380,
+        "wires": [
+            [
+                "22fa716d.d527ee"
+            ]
+        ]
+    },
+    {
+        "id": "22fa716d.d527ee",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "List Response",
+        "statusCode": "",
+        "headers": {
+            "content-type": "application/json"
+        },
+        "x": 540,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "7c200acc.dcfd2c",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "GET Config",
+        "url": "/temp/ai-research-agent/get-config",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 1440,
+        "wires": [
+            [
+                "1d277e88.dd2d29"
+            ]
+        ]
+    },
+    {
+        "id": "1d277e88.dd2d29",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Read Config File",
+        "func": "const require = context.global.get('require');\n\nconst fs = require('fs');\nconst path = require('path');\n\nconst configPath = '/interplay_v2/public/private/Apps/ResearchAgent/research_agent_config.json';\n\ntry {\n    if (!fs.existsSync(configPath)) {\n        throw new Error('Configuration file not found.');\n    }\n    const raw = fs.readFileSync(configPath, 'utf-8');\n    const config = JSON.parse(raw);\n    msg.payload = { success: true, data: config };\n    msg.statusCode = 200;\n} catch (err) {\n    msg.payload = { success: false, error: err.message };\n    msg.statusCode = 500;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 330,
+        "y": 1440,
+        "wires": [
+            [
+                "62737c07.85fe14"
+            ]
+        ]
+    },
+    {
+        "id": "62737c07.85fe14",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "GET Config Response",
+        "statusCode": "",
+        "headers": {
+            "content-type": "application/json"
+        },
+        "x": 550,
+        "y": 1440,
+        "wires": []
+    },
+    {
+        "id": "1a920ccc.71d1e3",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "POST Update Config",
+        "url": "/temp/ai-research-agent/update-config",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 1500,
+        "wires": [
+            [
+                "1ded2aca.fadfb5"
+            ]
+        ]
+    },
+    {
+        "id": "1ded2aca.fadfb5",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Write Config File",
+        "func": "const require = context.global.get('require');\n\nconst fs = require('fs');\nconst path = require('path');\n\nconst configPath = '/interplay_v2/public/private/Apps/ResearchAgent/research_agent_config.json';\n\ntry {\n    const config = msg.payload;\n\n    if (typeof config !== 'object') {\n        throw new Error('Invalid configuration format. Must be a JSON object.');\n    }\n\n    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');\n\n    msg.payload = { success: true, message: 'Configuration updated successfully.' };\n    msg.statusCode = 200;\n} catch (err) {\n    msg.payload = { success: false, error: err.message };\n    msg.statusCode = 500;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 380,
+        "y": 1500,
+        "wires": [
+            [
+                "9c763936.75c2e"
+            ]
+        ]
+    },
+    {
+        "id": "9c763936.75c2e",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "POST Config Response",
+        "statusCode": "",
+        "headers": {
+            "content-type": "application/json"
+        },
+        "x": 590,
+        "y": 1500,
+        "wires": []
+    },
+    {
+        "id": "3173ab62.a07d3c",
+        "type": "http in",
+        "z": "8e3e3fa4.3f394",
+        "name": "GET File Content",
+        "url": "/temp/ai-research-agent/get-file-content/:fileName",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 1560,
+        "wires": [
+            [
+                "240fa312.f0bfec"
+            ]
+        ]
+    },
+    {
+        "id": "240fa312.f0bfec",
+        "type": "function",
+        "z": "8e3e3fa4.3f394",
+        "name": "Serve File Content",
+        "func": "// Modified function to handle both PDF and text files\nconst require = context.global.get('require');\nconst fs = require('fs');\nconst path = require('path');\n\nconst DATA_DIR = '/interplay_v2/public/private/user_storage/ResearchDocs/';\n\ntry {\n    const fileName = msg.req.params.fileName;\n    \n    if (!fileName) {\n        throw new Error('File name is required');\n    }\n\n    // Try to find the file directly by filename\n    const filePath = path.join(DATA_DIR, fileName);\n    \n    if (!fs.existsSync(filePath)) {\n        throw new Error('File not found');\n    }\n\n    // Determine file type based on extension\n    const fileExtension = path.extname(fileName).toLowerCase();\n    \n    if (fileExtension === '.txt' || fileExtension === '.text') {\n        // Handle text files\n        const textContent = fs.readFileSync(filePath, 'utf-8');\n        \n        // Set appropriate headers for text content\n        msg.headers = {\n            'Content-Type': 'text/plain; charset=utf-8',\n            'Content-Length': Buffer.byteLength(textContent),\n            'Cache-Control': 'public, max-age=3600',\n            'Content-Disposition': 'inline; filename=\"' + path.basename(filePath) + '\"'\n        };\n        \n        msg.payload = textContent;\n    } else {\n        // Default to PDF handling for all other file types\n        const fileBuffer = fs.readFileSync(filePath);\n        \n        // Set appropriate headers for PDF content\n        msg.headers = {\n            'Content-Type': 'application/pdf',\n            'Content-Length': fileBuffer.length,\n            'Cache-Control': 'public, max-age=3600',\n            'Content-Disposition': 'inline; filename=\"' + path.basename(filePath) + '\"'\n        };\n        \n        msg.payload = fileBuffer;\n    }\n    \n    msg.statusCode = 200;\n    \n} catch (error) {\n    console.error('Error serving file content:', error);\n    msg.payload = { success: false, error: error.message || 'Failed to load file content' };\n    msg.statusCode = 404;\n    msg.headers = {\n        'Content-Type': 'application/json'\n    };\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "newThread": false,
+        "noerr": 0,
+        "x": 380,
+        "y": 1560,
+        "wires": [
+            [
+                "cb582c.6dea7fd8"
+            ]
+        ]
+    },
+    {
+        "id": "cb582c.6dea7fd8",
+        "type": "http response",
+        "z": "8e3e3fa4.3f394",
+        "name": "File Content Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 610,
+        "y": 1560,
+        "wires": []
+    },
+    {
+        "id": "fe0c69b5.92f57",
+        "type": "template",
+        "z": "8e3e3fa4.3f394",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Research Agent</title>\n    <style>\n        html, body {\n            margin: 0;\n            padding: 0;\n            height: 100%;\n            width: 100%;\n            overflow: hidden; /* Hide outer scroll */\n        }\n\n        body {\n            width:100%;\n            margin: 0 auto;\n            height: 100%;\n        }\n\n        iframe {\n            width: 100%;\n            height: 100%;\n            border: none;\n\n            /* Hide scrollbar but allow scroll */\n            scrollbar-width: none; /* Firefox */\n            -ms-overflow-style: none;  /* IE and Edge */\n        }\n\n        iframe::-webkit-scrollbar {\n            display: none; /* Chrome, Safari, Opera */\n        }\n    </style>\n</head>\n<body>\n<iframe src=\"/Apps/ResearchAgent/index.html\"></iframe>\n</body>\n</html>\n\n\n",
+        "output": "str",
+        "x": 300,
+        "y": 1220,
+        "wires": [
+            []
+        ]
+    }
+]
